@@ -5,7 +5,6 @@ export default function FinancialChart() {
         Program Growth
       </h2>
 
-      {/* Your actual chart JSX goes here */}
       <div className="border rounded-2xl p-10 text-center">
         Chart goes here
       </div>
