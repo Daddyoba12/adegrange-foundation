@@ -1,0 +1,16 @@
+<section className="py-24 text-center">
+  <h2 className="text-3xl font-semibold mb-6">
+    Latest Annual Report
+  </h2>
+
+  <p className="mb-8">
+    Explore our most recent accountability and impact summary.
+  </p>
+
+  <a
+    href="/impact"
+    className="bg-pink-600 text-white px-8 py-3 rounded-lg"
+  >
+    View Full Report
+  </a>
+</section>

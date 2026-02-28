@@ -1,0 +1,153 @@
+"use client"
+
+import { motion } from "framer-motion"
+
+function Counter({ number, label }: { number: number; label: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      viewport={{ once: true }}
+      className="space-y-2"
+    >
+      <h3 className="text-4xl font-bold text-pink-600">
+        {number.toLocaleString()}+
+      </h3>
+      <p className="text-zinc-600 dark:text-zinc-400">{label}</p>
+    </motion.div>
+  )
+}
+
+function LeaderCard({
+  name,
+  title,
+  image,
+}: {
+  name: string
+  title: string
+  image: string
+}) {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      className="bg-white dark:bg-zinc-800 shadow-lg rounded-lg overflow-hidden"
+    >
+      <img src={image} className="w-full h-64 object-cover" />
+      <div className="p-6">
+        <h3 className="font-bold text-lg">{name}</h3>
+        <p className="text-pink-600">{title}</p>
+      </div>
+    </motion.div>
+  )
+}
+
+export default function Home() {
+  return (
+    <main className="overflow-hidden">
+
+      {/* HERO */}
+      <section className="relative h-screen flex items-center justify-center text-center">
+
+        <div
+          className="absolute inset-0 bg-cover bg-center scale-105"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1920')",
+          }}
+        />
+
+        <div className="absolute inset-0 bg-black/60" />
+
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="relative z-10 text-white max-w-3xl px-6"
+        >
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            Empowering Mothers. Protecting Children.
+          </h1>
+
+          <p className="text-lg md:text-xl mb-8 text-gray-200">
+            AdeGrange Child Foundation is committed to reducing maternal and
+            child mortality and strengthening communities across Africa.
+          </p>
+
+          <div className="flex justify-center gap-6">
+            <a
+              href="/donate"
+              className="bg-pink-600 hover:bg-pink-700 px-8 py-3 rounded-lg transition"
+            >
+              Donate Now
+            </a>
+
+            <a
+              href="/about"
+              className="border border-white px-8 py-3 rounded-lg"
+            >
+              Learn More
+            </a>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* IMPACT */}
+      <section className="py-20 bg-white dark:bg-zinc-950 text-center">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-12">
+          <Counter number={15} label="Years Impact" />
+          <Counter number={10000} label="Children Reached" />
+          <Counter number={4} label="Strategic Pillars" />
+          <Counter number={2009} label="Founded" />
+        </div>
+      </section>
+
+      {/* PARALLAX */}
+      <section
+        className="h-[60vh] bg-fixed bg-cover bg-center flex items-center justify-center text-white"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1920')",
+        }}
+      >
+        <div className="bg-black/60 p-12 text-center max-w-2xl">
+          <h2 className="text-3xl font-bold mb-4">
+            Building Healthier Futures Across Africa
+          </h2>
+          <p>
+            From grassroots advocacy to national policy influence,
+            our mission reaches the farthest communities.
+          </p>
+        </div>
+      </section>
+
+      {/* LEADERSHIP */}
+      <section className="py-20 bg-zinc-50 dark:bg-zinc-900">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-12">Leadership Team</h2>
+
+          <div className="grid md:grid-cols-3 gap-10">
+            <LeaderCard
+              name="Prof. Adenike Grange"
+              title="Founder & President"
+              image="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=500"
+            />
+
+            <LeaderCard
+              name="Obehi Ilenikhena"
+              title="Director of Programming"
+              image="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=500"
+            />
+
+            <LeaderCard
+              name="Blessing Nwachukwu"
+              title="Director of Development"
+              image="https://images.unsplash.com/photo-1582750433449-648ed127bb54?q=80&w=500"
+            />
+          </div>
+        </div>
+      </section>
+
+    </main>
+  )
+}

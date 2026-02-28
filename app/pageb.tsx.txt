@@ -1,0 +1,47 @@
+export default function FounderPage() {
+  return (
+    <div className="min-h-screen bg-white dark:bg-zinc-950 py-20 px-6">
+      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+
+        {/* Image */}
+        <div className="relative">
+          <img
+            src="/images/founder.jpg"
+            alt="Professor Adenike Grange"
+            className="rounded-2xl shadow-2xl"
+          />
+        </div>
+
+        {/* Content */}
+        <div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Professor Adenike Grange
+          </h1>
+
+          <p className="text-pink-600 font-semibold mb-6">
+            Founder & President, AdeGrange Child Foundation
+          </p>
+
+          <p className="mb-6 text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            Professor Adenike Grange is a distinguished pediatrician,
+            public health leader, and former Minister of Health of the
+            Federal Republic of Nigeria.
+          </p>
+
+          <p className="mb-6 text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            With over four decades of service in pediatrics and global health,
+            she has served as a consultant to WHO, UNICEF, and USAID,
+            authored more than sixty peer-reviewed publications,
+            and represented civil society on the Board of GAVI.
+          </p>
+
+          <p className="text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            Her legacy continues as a beacon of leadership, innovation,
+            and unwavering commitment to strengthening maternal and child
+            health systems across Africa.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
