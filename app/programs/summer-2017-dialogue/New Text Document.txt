@@ -1,0 +1,71 @@
+//app/programs/summer-2017-dialogue/page.tsx
+
+"use client"
+
+import { useState } from "react"
+
+export default function Summer2017Page() {
+
+  const [tab, setTab] = useState("day1")
+
+  return (
+    <div className="min-h-screen px-6 py-24 bg-white space-y-16">
+
+      <div className="max-w-4xl mx-auto text-center">
+        <h1 className="text-4xl font-bold mb-6">
+          Summer 2017 Peer-to-Peer Dialogue Program
+        </h1>
+        <p className="text-gray-600 text-lg">
+          This initiative brought together young participants across communities
+          to engage in structured dialogue, leadership development, and
+          collaborative learning.
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex justify-center gap-6">
+        {["day1", "day2", "video"].map((item) => (
+          <button
+            key={item}
+            onClick={() => setTab(item)}
+            className={`px-6 py-3 rounded-full ${
+              tab === item
+                ? "bg-black text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            {item === "day1" && "Day 1 Gallery"}
+            {item === "day2" && "Day 2 Gallery"}
+            {item === "video" && "Video"}
+          </button>
+        ))}
+      </div>
+
+      <div className="rounded-2xl overflow-hidden shadow-xl border max-w-6xl mx-auto">
+
+        {tab === "day1" && (
+          <iframe
+            src="https://drive.google.com/embeddedfolderview?id=1_psaI_D8GsCO7D9CU2wHfR6qfbHP3bog#grid"
+            className="w-full h-[650px]"
+          />
+        )}
+
+        {tab === "day2" && (
+          <iframe
+            src="https://drive.google.com/embeddedfolderview?id=1KjirgKnIW9-qyRt2pvHNOY0yDxxuf9-D#grid"
+            className="w-full h-[650px]"
+          />
+        )}
+
+        {tab === "video" && (
+          <iframe
+            className="w-full h-[600px]"
+            src="https://www.youtube.com/embed/7Xn_ZcZEfac"
+            allowFullScreen
+          />
+        )}
+
+      </div>
+    </div>
+  )
+}

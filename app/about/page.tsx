@@ -8,14 +8,14 @@ export default function AboutPage() {
     <div className="min-h-screen">
 
       {/* HERO */}
-       <section className="relative h-[65vh] flex items-center justify-center text-center overflow-hidden">
+       <section className="relative h-[60vh] md:h-[65vh] lg:h-[650px] max-h-[700px] flex items-center justify-center text-center overflow-hidden">
 
   <Image
     src="/images/about-hero.jpg"
     alt="Community outreach"
     fill
     priority
-    className="object-cover brightness-105 contrast-110"
+    className="object-cover object-[center_30%] brightness-105 contrast-110"
   />
 
   <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
@@ -91,37 +91,28 @@ export default function AboutPage() {
       </section>
 
       {/* SPLIT SECTION */}
-      <section className="py-24 px-6 border-t">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+    <section className="relative h-[75vh] w-full flex items-center justify-center overflow-hidden">
 
-          <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-xl">
-            <Image
-              src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1920"
-              alt="Community outreach"
-              fill
-              className="object-cover"
-            />
-          </div>
+  {/* Blurred Background */}
+  <Image
+    src="/images/about-hero.jpg"
+    alt=""
+    fill
+    className="object-cover blur-xl scale-110 opacity-40"
+  />
 
-          <div className="space-y-6">
-            <h2 className="text-3xl font-semibold">
-              Building Sustainable Impact
-            </h2>
+  {/* Sharp Center Image */}
+  <div className="relative z-10 h-[85%]">
+    <Image
+      src="/images/about-hero2.jpg"
+      alt="Mother and Child"
+      width={800}
+      height={600}
+      className="object-contain h-full w-auto"
+    />
+  </div>
 
-            <p className="leading-relaxed">
-              Our approach integrates healthcare access, community engagement,
-              and policy advocacy to create measurable and sustainable impact.
-            </p>
-
-            <p className="leading-relaxed">
-              Through partnerships with local and international stakeholders,
-              we ensure accountability, transparency, and long-term
-              transformation.
-            </p>
-          </div>
-
-        </div>
-      </section>
+</section>
 
       {/* IMPACT BAND */}
       <section className="py-20 border-t text-center">

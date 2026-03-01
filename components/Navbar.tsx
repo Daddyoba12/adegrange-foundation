@@ -33,22 +33,18 @@ export default function Navbar() {
       </Link>
 
       <div className="flex gap-6 items-center">
-        <Link href="/about">About</Link>
-<Link href="/founder">Founder</Link>
-        <Link href="/programs">Programs</Link>
-        <Link href="/blog">Blog</Link>
-<Link href="/impact">Impact</Link>
 
-        
+        <Link href="/about">About</Link>
+
+        <Link href="/founder">Founder</Link>
+
+        <Link href="/programs">Programs</Link>
+
+        <Link href="/contact">Contact Us</Link>
+
         {!user ? (
           <>
             <Link href="/login">Login</Link>
-            <Link
-              href="/register"
-              className="border px-3 py-1 rounded"
-            >
-              Register
-            </Link>
           </>
         ) : (
           <>
@@ -68,6 +64,7 @@ export default function Navbar() {
         >
           Toggle
         </button>
+
       </div>
     </nav>
   )

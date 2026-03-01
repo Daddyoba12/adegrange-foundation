@@ -8,13 +8,26 @@ const leaders: any = {
     name: "Obehi Ilenikhena",
     title: "Director of Programming",
     image: "/images/staffs/Obehi Ilenikhena.jpg",
-    bio: `
-Obehi “O” Ilenikhena is a public health professional and development advocate focused on strengthening health systems and empowering vulnerable communities.
+    bio: `BACKGROUND & INSPIRATION
 
-She currently serves as the State Lead Project Coordinator for HIV Home Test Kit distribution and oversees strategic public health engagement initiatives.
+Obehi “O” Ilenikhena’s journey began in Nigeria and later expanded to the United States, shaping her into a dedicated advocate for transformative healthcare and community empowerment. Personal experiences with her mother’s health challenges and misdiagnoses in Nigeria sparked her commitment to strengthening healthcare systems that prioritize patient wellbeing and dignity.
 
-Obehi holds a Master of Public Health (MPH) with specialization in Environmental and Global Health, with expertise in Water Quality.
-    `,
+PROFESSIONAL LEADERSHIP
+
+Obehi currently serves as the State Lead Project Coordinator for HIV Home Test Kit distribution, holding the role of HIV Home Testing Program Coordinator. In this capacity, she oversees strategic implementation, outreach coordination, and public health engagement initiatives aimed at expanding access to preventive healthcare services.
+
+ACADEMIC & GLOBAL HEALTH EXPERIENCE
+
+She holds a Master of Public Health (MPH) with specialization in Environmental Health and Global Health, with a focused expertise in Water Quality. Her international experience includes research collaboration with the Safe Water and AIDS Project (SWAP) in Western Kenya, where she contributed to initiatives improving clean and accessible water for underserved communities.
+
+FOUNDATION ENGAGEMENT
+
+Within AdeGrange Child Foundation, Obehi contributes as Director of Programming and Content Creator, channeling her passion for public health advocacy into impactful initiatives that amplify marginalized voices without stigma or bias.
+
+VISION & PHILOSOPHY
+
+Obehi envisions establishing a public health consulting firm in Nigeria to expand clean water access, maternal support systems, and youth empowerment programs. Guided by humility and service, she believes advocacy must empower communities rather than impose solutions.
+`,
   },
 
   "blessing-nwachukwu": {
@@ -22,10 +35,24 @@ Obehi holds a Master of Public Health (MPH) with specialization in Environmental
     title: "Director of Development & Communications",
     image: "/images/staffs/Blessing Nwachukwu.png",
     bio: `
-Blessing C. Nwachukwu is a Registered Nurse and Public Health Specialist with expertise in regulatory compliance and biomedical informatics.
+FOUNDATIONAL JOURNEY
 
-She holds an MPH and is a PhD candidate in Biomedical and Health Information Sciences.
-    `,
+Blessing C. Nwachukwu’s life journey spans Nigeria, Ukraine, and the United States, shaping her perspective on health equity and social disparities. Early exposure to stark differences between urban and rural living conditions deepened her commitment to addressing environmental and healthcare inequities affecting vulnerable populations.
+
+PROFESSIONAL EXPERTISE
+
+Blessing serves as a Hospital Accreditation and Regulatory Compliance Specialist and is a Registered BSc. Nurse. She is currently a PhD candidate in Biomedical and Health Information Sciences. Her academic credentials include a Master of Public Health with concentration in Environmental and Occupational Sciences. She holds certifications in Incident Command Response, Health and Safety, Healthcare Accreditation, and Certified Professional in Healthcare Quality (CPHQ).
+
+Her professional focus includes healthcare compliance, accreditation systems, and interdisciplinary research in informatics tools that support improved clinical decision-making, particularly within low–middle income populations.
+
+FOUNDATION LEADERSHIP
+
+As Director of Development & Communications at AdeGrange Child Foundation, Blessing coordinates strategic partnerships, program growth, and institutional development. She remains committed to strengthening healthcare access and promoting education across underserved communities.
+
+VISION & IMPACT
+
+Blessing’s long-term vision centers on leveraging artificial intelligence to expand healthcare access for marginalized populations. She firmly believes that sustainable transformation begins with incremental action — that “little drops of water make a mighty ocean.”
+`,
   },
 
   "deborah-daka": {
@@ -33,19 +60,47 @@ She holds an MPH and is a PhD candidate in Biomedical and Health Information Sci
     title: "Director of Finance",
     image: "/images/staffs/Deborah Daka.png",
     bio: `
-Deborah Daka is a healthcare management professional with dual expertise in Public Health and Business Administration (MPH, MBA).
+FOUNDATIONAL JOURNEY
 
-She provides financial oversight and strategic advisory leadership.
-    `,
+Blessing C. Nwachukwu’s life journey spans Nigeria, Ukraine, and the United States, shaping her perspective on health equity and social disparities. Early exposure to stark differences between urban and rural living conditions deepened her commitment to addressing environmental and healthcare inequities affecting vulnerable populations.
+
+PROFESSIONAL EXPERTISE
+
+Blessing serves as a Hospital Accreditation and Regulatory Compliance Specialist and is a Registered BSc. Nurse. She is currently a PhD candidate in Biomedical and Health Information Sciences. Her academic credentials include a Master of Public Health with concentration in Environmental and Occupational Sciences. She holds certifications in Incident Command Response, Health and Safety, Healthcare Accreditation, and Certified Professional in Healthcare Quality (CPHQ).
+
+Her professional focus includes healthcare compliance, accreditation systems, and interdisciplinary research in informatics tools that support improved clinical decision-making, particularly within low–middle income populations.
+
+FOUNDATION LEADERSHIP
+
+As Director of Development & Communications at AdeGrange Child Foundation, Blessing coordinates strategic partnerships, program growth, and institutional development. She remains committed to strengthening healthcare access and promoting education across underserved communities.
+
+VISION & IMPACT
+
+Blessing’s long-term vision centers on leveraging artificial intelligence to expand healthcare access for marginalized populations. She firmly believes that sustainable transformation begins with incremental action — that “little drops of water make a mighty ocean.”
+`,
   },
 
   "foyinsola-bankole": {
     name: "Foyinsola Bankole",
     title: "Director of Strategy",
     image: "/images/staffs/Foyinsola Bankole.jpeg",
-    bio: `
-Foyinsola Bankole is a development practitioner and policy analyst with expertise in project management and social development.
-    `,
+    bio:  `
+PROFESSIONAL PROFILE
+
+Foyinsola Bankole is a development practitioner, policy analyst, social worker, and content creator with experience spanning national and international organizations. Her professional background includes human resource management, project coordination, and social development initiatives.
+
+FOUNDATION ROLE
+
+As Project Officer and Director of Strategy for AdeGrange Child Foundation, Foyinsola supports operational execution of programs addressing the needs of women and children across Africa. She ensures alignment between strategic objectives and field-level implementation.
+
+COMMITMENT TO SOCIAL DEVELOPMENT
+
+Her work focuses on advocacy, program design, and community engagement, strengthening institutional capacity while amplifying marginalized voices.
+
+VISION
+
+Foyinsola remains committed to advancing inclusive social development through evidence-based programming and strategic policy engagement.
+`,
   },
 }
 
