@@ -8,7 +8,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="fixed w-full z-50 bg-black/95 backdrop-blur-md border-b border-gray-800">
+    <header className="fixed top-0 w-full z-50 bg-black/95 backdrop-blur-md border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
         {/* Logo */}
@@ -28,7 +28,8 @@ export default function Navbar() {
         {/* Mobile Toggle */}
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden text-white"
+          className="md:hidden text-white p-2 -mr-2"
+          aria-label="Toggle menu"
         >
           {open ? <X size={28} /> : <Menu size={28} />}
         </button>
@@ -36,12 +37,50 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden bg-black border-t border-gray-800 px-6 py-6 space-y-6 text-white text-lg">
-          <Link href="/about" onClick={() => setOpen(false)}>About</Link>
-          <Link href="/founder" onClick={() => setOpen(false)}>Founder</Link>
-          <Link href="/programs" onClick={() => setOpen(false)}>Programs</Link>
-          <Link href="/contact" onClick={() => setOpen(false)}>Contact</Link>
-          <Link href="/login" onClick={() => setOpen(false)}>Login</Link>
+        <div className="md:hidden bg-black border-t border-gray-800">
+          <div className="flex flex-col px-6 py-6">
+
+            <Link
+              href="/about"
+              onClick={() => setOpen(false)}
+              className="text-lg text-gray-300 hover:text-white py-4 border-b border-gray-800 transition"
+            >
+              About
+            </Link>
+
+            <Link
+              href="/founder"
+              onClick={() => setOpen(false)}
+              className="text-lg text-gray-300 hover:text-white py-4 border-b border-gray-800 transition"
+            >
+              Founder
+            </Link>
+
+            <Link
+              href="/programs"
+              onClick={() => setOpen(false)}
+              className="text-lg text-gray-300 hover:text-white py-4 border-b border-gray-800 transition"
+            >
+              Programs
+            </Link>
+
+            <Link
+              href="/contact"
+              onClick={() => setOpen(false)}
+              className="text-lg text-gray-300 hover:text-white py-4 border-b border-gray-800 transition"
+            >
+              Contact
+            </Link>
+
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="text-lg text-gray-300 hover:text-white py-4 transition"
+            >
+              Login
+            </Link>
+
+          </div>
         </div>
       )}
     </header>
