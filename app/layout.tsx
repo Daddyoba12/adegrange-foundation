@@ -14,10 +14,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <body className="min-h-screen bg-white text-gray-900 dark:bg-black dark:text-white transition-colors duration-500">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
           <Navbar />
-          {children}
+          <main className="min-h-screen transition-colors duration-500">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>

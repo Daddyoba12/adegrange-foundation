@@ -202,12 +202,16 @@ async function main() {
 
   const programs = [
     {
-      programId: '2019-feeding-project',
-      displayName: '2019 Feeding Project — Chicago, Illinois',
-      folders: [
-        { fullPath: path.join(base, '2019 Feeding Project Chicago, Illinois.docx'), displayName: 'Reports' }
-      ]
-    },
+  programId: '2019-feeding-project',
+  displayName: '2019 Feeding Project — Chicago, Illinois',
+  folders: [
+    { 
+      fullPath: 'C:\\Users\\babso\\Downloads\\2019 Feeding Project Chicago, Illinois .pdf',
+      displayName: 'Reports' 
+    }
+  ]
+},
+
     {
       programId: '2019-girls-health-matter',
       displayName: 'Summer 2019 — Girls Health Matter',
