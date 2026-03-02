@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ProgramGallery from '@/components/ProgramGallery'
 import Link from 'next/link'
 
-export default function ProgramsPage() {
+function ProgramsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -69,7 +69,6 @@ export default function ProgramsPage() {
     <div className="min-h-screen py-20 px-6 bg-gray-50 dark:bg-black transition-colors duration-500">
       <div className="container mx-auto max-w-7xl">
 
-        {/* Header */}
         <div className="text-center mb-20">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900 dark:text-white">
             Our Programs & Impact
@@ -80,23 +79,13 @@ export default function ProgramsPage() {
           </p>
         </div>
 
-        {/* Programs Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {programs.map((program) => (
             <div
               key={program.id}
-              className="
-                group relative
-                rounded-2xl p-10
-                bg-white dark:bg-gray-900
-                border border-gray-200 dark:border-gray-800
-                shadow-lg hover:shadow-xl
-                transition-all duration-300
-                hover:-translate-y-1
-              "
+              className="group relative rounded-2xl p-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               <div className="space-y-6">
-
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
                   {program.title}
                 </h2>
@@ -109,28 +98,14 @@ export default function ProgramsPage() {
 
                   <Link 
                     href={`/programs/${program.id}`}
-                    className="
-                      px-6 py-3 rounded-lg
-                      bg-black text-white
-                      dark:bg-white dark:text-black
-                      font-medium
-                      transition-all duration-200
-                      hover:scale-105
-                    "
+                    className="px-6 py-3 rounded-lg bg-black text-white dark:bg-white dark:text-black font-medium transition-all duration-200 hover:scale-105"
                   >
                     View Program
                   </Link>
 
                   <button
                     onClick={() => openGallery(program.id)}
-                    className="
-                      px-6 py-3 rounded-lg
-                      border border-gray-300 dark:border-gray-700
-                      text-gray-900 dark:text-white
-                      hover:bg-gray-100 dark:hover:bg-gray-800
-                      transition-all duration-200
-                      hover:scale-105
-                    "
+                    className="px-6 py-3 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover:scale-105"
                   >
                     Open Gallery
                   </button>
@@ -141,7 +116,6 @@ export default function ProgramsPage() {
           ))}
         </div>
 
-        {/* Gallery Modal */}
         <ProgramGallery
           programId={selectedProgram || ''}
           programTitle={selectedProgramData?.title || 'Program Gallery'}
@@ -151,5 +125,13 @@ export default function ProgramsPage() {
 
       </div>
     </div>
+  )
+}
+
+export default function ProgramsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <ProgramsContent />
+    </Suspense>
   )
 }

@@ -6,6 +6,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@supabase/supabase-js'
 
+interface MediaState {
+  images: any[]
+  documents: any[]
+  videos: any[]
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -89,7 +95,18 @@ export default function ProgramDetailPage() {
   const programId = params.id as string
   const program = programsData[programId as keyof typeof programsData]
   
-  const [media, setMedia] = useState({ images: [], documents: [], videos: [] })
+  //const [media, setMedia] = useState({ images: [], documents: [], videos: [] })
+
+const [media, setMedia] = useState<MediaState>({
+  images: [],
+  documents: [],
+  videos: [],
+})
+
+
+
+
+
   const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState<any>(null)
 
@@ -99,21 +116,19 @@ export default function ProgramDetailPage() {
 
   async function loadMedia() {
     try {
-      // Fetch media
       const { data: mediaData } = await supabase
         .from('program_media')
         .select('*')
         .eq('program_id', programId)
-        .limit(6) // Show first 6 images as preview
+        .limit(6)
 
-      // Fetch videos
       const { data: videoData } = await supabase
         .from('program_videos')
         .select('*')
         .eq('program_id', programId)
 
-      const images = []
-      const documents = []
+     const images: any[] = []
+const documents: any[] = []
 
       if (mediaData) {
         for (const item of mediaData) {
@@ -169,29 +184,29 @@ export default function ProgramDetailPage() {
 
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{program.title}</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 dark:text-white">{program.title}</h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">{program.description}</p>
           
-          {/* Quick Stats */}
+          {/* Quick Stats - FIXED FOR LIGHT MODE */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-800">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Year</div>
-              <div className="text-2xl font-bold">{program.year}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Year</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{program.year}</div>
             </div>
             <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-800">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Location</div>
-              <div className="text-2xl font-bold">{program.location}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Location</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{program.location}</div>
             </div>
             <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-800 md:col-span-2">
-              <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Beneficiaries</div>
-              <div className="text-2xl font-bold">{program.beneficiaries}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Beneficiaries</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{program.beneficiaries}</div>
             </div>
           </div>
         </div>
 
         {/* About Section */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold mb-4">About the Program</h2>
+          <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">About the Program</h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
             {program.fullDescription}
           </p>
@@ -199,7 +214,7 @@ export default function ProgramDetailPage() {
 
         {/* Impact Section */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold mb-6">Key Impact</h2>
+          <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Key Impact</h2>
           <div className="grid gap-4">
             {program.impact.map((item, index) => (
               <div 
@@ -218,44 +233,46 @@ export default function ProgramDetailPage() {
         </section>
 
         {/* Media Preview */}
-        <section className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold">Gallery Preview</h2>
-            <Link 
-              href={`/programs?gallery=${programId}`}
-              className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-            >
-              View Full Gallery →
-            </Link>
-          </div>
-          
-          {loading ? (
-            <div className="text-center py-12">Loading...</div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {media.images.slice(0, 6).map((image: any) => (
-                <div 
-                  key={image.id}
-                  className="relative aspect-square cursor-pointer group overflow-hidden rounded-lg"
-                  onClick={() => setSelectedImage(image)}
-                >
-                  <Image
-                    src={image.url}
-                    alt={image.file_name}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
-                    sizes="(max-width: 768px) 50vw, 33vw"
-                  />
-                </div>
-              ))}
+        {media.images.length > 0 && (
+          <section className="mb-12">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Gallery Preview</h2>
+              <Link 
+                href="/programs"
+                className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+              >
+                View Full Gallery →
+              </Link>
             </div>
-          )}
-        </section>
+            
+            {loading ? (
+              <div className="text-center py-12 text-gray-600 dark:text-gray-400">Loading...</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {media.images.slice(0, 6).map((image: any) => (
+                  <div 
+                    key={image.id}
+                    className="relative aspect-square cursor-pointer group overflow-hidden rounded-lg"
+                    onClick={() => setSelectedImage(image)}
+                  >
+                    <Image
+                      src={image.url}
+                      alt={image.file_name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      sizes="(max-width: 768px) 50vw, 33vw"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Documents */}
         {media.documents.length > 0 && (
           <section className="mb-12">
-            <h2 className="text-3xl font-bold mb-6">Reports & Documents</h2>
+            <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Reports & Documents</h2>
             <div className="grid gap-4">
               {media.documents.map((doc: any) => (
                 <a
@@ -267,8 +284,8 @@ export default function ProgramDetailPage() {
                 >
                   <div className="text-4xl">📄</div>
                   <div>
-                    <p className="font-semibold">{doc.file_name}</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Click to download</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{doc.file_name}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Click to view</p>
                   </div>
                 </a>
               ))}
