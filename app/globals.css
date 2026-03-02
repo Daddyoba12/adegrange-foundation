@@ -27,3 +27,11 @@ body {
   color: var(--foreground);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+@layer components {
+  .card {
+    @apply bg-white dark:bg-gray-900 
+           border border-gray-200 dark:border-gray-700
+           rounded-lg shadow-sm;
+  }
+}

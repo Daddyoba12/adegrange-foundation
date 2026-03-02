@@ -125,7 +125,8 @@ export default function RootLayout({
       <body className="min-h-screen bg-white text-gray-900 dark:bg-black dark:text-white transition-colors duration-500">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Navbar />
-          <main className="min-h-screen transition-colors duration-500">
+          
+<main className="min-h-screen transition-colors duration-500 pt-20">
             {children}
           </main>
         </ThemeProvider>
