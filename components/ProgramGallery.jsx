@@ -155,30 +155,50 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
   return (
     <div className="fixed inset-0 bg-black bg-opacity-95 z-50 overflow-y-auto">
       <div className="container mx-auto p-4 md:p-8">
-        {/* Header */}
+
+        {/* ── Header ── */}
         <div className="flex justify-between items-center mb-6 sticky top-0 bg-black bg-opacity-95 py-4 z-10">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white">
-              {programTitle || 'Program Gallery'}
-            </h2>
-            <p className="text-gray-400 text-sm mt-1">
-              {media.images.length} photos · {media.documents.length} documents · {media.videos.length} videos
-            </p>
+          <div className="flex items-center gap-4">
+
+            {/* ✅ ADDED: Back to page button */}
+            <button
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+
+            <div className="w-px h-6 bg-gray-700" />
+
+            <div>
+              <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-white leading-tight">
+                {programTitle || 'Program Gallery'}
+              </h2>
+              <p className="text-gray-400 text-xs sm:text-sm mt-0.5">
+                {media.images.length} photos · {media.documents.length} documents · {media.videos.length} videos
+              </p>
+            </div>
           </div>
+
+          {/* Close × */}
           <button
             onClick={onClose}
-            className="text-white text-4xl hover:text-gray-300 transition"
+            className="text-white text-4xl hover:text-gray-300 transition leading-none"
+            aria-label="Close gallery"
           >
             ×
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8 border-b border-gray-700">
+        {/* ── Tabs ── */}
+        <div className="flex gap-1 sm:gap-4 mb-8 border-b border-gray-700 overflow-x-auto">
           {media.images.length > 0 && (
             <button
               onClick={() => setActiveTab('images')}
-              className={`px-6 py-3 font-semibold transition ${
+              className={`px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base whitespace-nowrap transition ${
                 activeTab === 'images'
                   ? 'text-white border-b-2 border-white'
                   : 'text-gray-400 hover:text-gray-200'
@@ -191,7 +211,7 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
           {media.documents.length > 0 && (
             <button
               onClick={() => setActiveTab('documents')}
-              className={`px-6 py-3 font-semibold transition ${
+              className={`px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base whitespace-nowrap transition ${
                 activeTab === 'documents'
                   ? 'text-white border-b-2 border-white'
                   : 'text-gray-400 hover:text-gray-200'
@@ -204,7 +224,7 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
           {media.videos.length > 0 && (
             <button
               onClick={() => setActiveTab('videos')}
-              className={`px-6 py-3 font-semibold transition ${
+              className={`px-4 sm:px-6 py-3 font-semibold text-sm sm:text-base whitespace-nowrap transition ${
                 activeTab === 'videos'
                   ? 'text-white border-b-2 border-white'
                   : 'text-gray-400 hover:text-gray-200'
@@ -219,16 +239,16 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
           <div className="text-white text-center text-xl py-12">Loading...</div>
         )}
 
-        {/* Photos Tab */}
+        {/* ── Photos Tab ── */}
         {!loading && activeTab === 'images' && media.images.length > 0 && (
           <div>
             {Object.entries(groupedImages).map(([folderName, images]) => (
               <div key={folderName} className="mb-12">
-                <h3 className="text-2xl font-semibold text-white mb-6 pb-2 border-b border-gray-800">
-                  {folderName} <span className="text-gray-500 text-lg">({images.length})</span>
+                <h3 className="text-xl sm:text-2xl font-semibold text-white mb-6 pb-2 border-b border-gray-800">
+                  {folderName} <span className="text-gray-500 text-base sm:text-lg">({images.length})</span>
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {images.map((image, folderIndex) => {
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+                  {images.map((image) => {
                     const globalIndex = media.images.indexOf(image)
                     return (
                       <div
@@ -244,8 +264,7 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
                             className="object-cover group-hover:scale-110 transition-transform duration-300"
                             sizes="(max-width: 768px) 50vw, 20vw"
                           />
-                          
-                          <div className="absolute bottom-2 left-2 px-2 py-1 bg-black bg-opacity-80 rounded text-white text-sm font-medium">
+                          <div className="absolute bottom-2 left-2 px-2 py-1 bg-black bg-opacity-80 rounded text-white text-xs sm:text-sm font-medium">
                             {globalIndex + 1}
                           </div>
                         </div>
@@ -258,37 +277,36 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
           </div>
         )}
 
-        {/* Documents Tab - Opens in Modal */}
+        {/* ── Documents Tab ── */}
         {!loading && activeTab === 'documents' && media.documents.length > 0 && (
           <div>
             {Object.entries(groupedDocuments).map(([folderName, documents]) => (
               <div key={folderName} className="mb-12">
-                <h3 className="text-2xl font-semibold text-white mb-6 pb-2 border-b border-gray-800">
-                  {folderName} <span className="text-gray-500 text-lg">({documents.length})</span>
+                <h3 className="text-xl sm:text-2xl font-semibold text-white mb-6 pb-2 border-b border-gray-800">
+                  {folderName} <span className="text-gray-500 text-base sm:text-lg">({documents.length})</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {documents.map((doc) => (
                     <button
                       key={doc.id}
                       onClick={() => setSelectedDocument(doc)}
-                      className="flex items-center justify-between gap-4 p-6 bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 hover:bg-gray-750 transition group text-left"
+                      className="flex items-center justify-between gap-4 p-5 sm:p-6 bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 hover:bg-gray-750 transition group text-left"
                     >
                       <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className="text-4xl flex-shrink-0">
+                        <div className="text-3xl sm:text-4xl flex-shrink-0">
                           {doc.file_name.endsWith('.pdf') ? '📄' : '📝'}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-white font-semibold truncate group-hover:text-blue-400 transition" title={doc.file_name}>
+                          <p className="text-white font-semibold truncate group-hover:text-blue-400 transition text-sm sm:text-base" title={doc.file_name}>
                             {doc.file_name}
                           </p>
-                          <p className="text-gray-400 text-sm">
+                          <p className="text-gray-400 text-xs sm:text-sm mt-0.5">
                             Click to view
                           </p>
                         </div>
                       </div>
-                      
                       <div className="flex-shrink-0">
-                        <svg className="w-6 h-6 text-gray-400 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
@@ -301,11 +319,11 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
           </div>
         )}
 
-        {/* Videos Tab */}
+        {/* ── Videos Tab ── */}
         {!loading && activeTab === 'videos' && media.videos.length > 0 && (
           <div>
-            <h3 className="text-2xl font-semibold text-white mb-6 pb-2 border-b border-gray-800">
-              Videos <span className="text-gray-500 text-lg">({media.videos.length})</span>
+            <h3 className="text-xl sm:text-2xl font-semibold text-white mb-6 pb-2 border-b border-gray-800">
+              Videos <span className="text-gray-500 text-base sm:text-lg">({media.videos.length})</span>
             </h3>
             <div className="grid grid-cols-1 gap-8">
               {media.videos.map((video) => {
@@ -324,7 +342,7 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
                       />
                     </div>
                     {video.title && (
-                      <p className="text-white mt-3 text-lg">{video.title}</p>
+                      <p className="text-white mt-3 text-base sm:text-lg">{video.title}</p>
                     )}
                   </div>
                 )
@@ -333,7 +351,7 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
           </div>
         )}
 
-        {/* Image Lightbox - NO DOWNLOAD */}
+        {/* ── Image Lightbox ── */}
         {selectedImage && (
           <div
             className="fixed inset-0 bg-black z-[60] flex flex-col"
@@ -342,12 +360,14 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
               setIsPlaying(false)
             }}
           >
-            <div className="flex justify-between items-center p-4 bg-black bg-opacity-95">
-              <div className="text-white flex items-center gap-4">
-                <span className="text-lg font-semibold">
+            <div className="flex justify-between items-center p-3 sm:p-4 bg-black bg-opacity-95">
+              <div className="text-white flex items-center gap-3 sm:gap-4">
+                <span className="text-base sm:text-lg font-semibold">
                   {selectedImageIndex + 1} / {media.images.length}
                 </span>
-                <span className="text-gray-400 text-sm hidden md:block">{selectedImage.file_name}</span>
+                <span className="text-gray-400 text-xs sm:text-sm hidden md:block">
+                  {selectedImage.file_name}
+                </span>
               </div>
               
               <div className="flex gap-2">
@@ -360,11 +380,11 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
                   title={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
                 >
                   {isPlaying ? (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   ) : (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -376,22 +396,24 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
                     setSelectedImage(null)
                     setIsPlaying(false)
                   }}
-                  className="text-white text-3xl hover:text-gray-300 px-3 transition"
+                  className="text-white text-3xl hover:text-gray-300 px-3 transition leading-none"
+                  aria-label="Close lightbox"
                 >
                   ×
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 flex items-center justify-center p-4 relative">
+            <div className="flex-1 flex items-center justify-center p-2 sm:p-4 relative">
               <button
                 onClick={(e) => {
                   e.stopPropagation()
                   navigateImage('prev')
                 }}
-                className="absolute left-4 p-3 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full text-white z-10 transition"
+                className="absolute left-2 sm:left-4 p-2 sm:p-3 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full text-white z-10 transition"
+                aria-label="Previous image"
               >
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -412,60 +434,70 @@ export default function ProgramGallery({ programId, programTitle, isOpen, onClos
                   e.stopPropagation()
                   navigateImage('next')
                 }}
-                className="absolute right-4 p-3 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full text-white z-10 transition"
+                className="absolute right-2 sm:right-4 p-2 sm:p-3 bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full text-white z-10 transition"
+                aria-label="Next image"
               >
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
 
-            <div className="p-3 bg-black bg-opacity-95 text-center text-gray-400 text-sm">
-              Use ← → arrow keys to navigate • Press ESC to close
+            <div className="p-2 sm:p-3 bg-black bg-opacity-95 text-center text-gray-400 text-xs sm:text-sm">
+              Use ← → arrow keys to navigate · Press ESC to close
             </div>
           </div>
         )}
 
-        {/* Document Modal */}
+        {/* ── Document Modal — download/save/print REMOVED ── */}
         {selectedDocument && (
           <div
             className="fixed inset-0 bg-black bg-opacity-95 z-[70] flex flex-col"
             onClick={() => setSelectedDocument(null)}
           >
-            <div className="flex justify-between items-center p-4 bg-black">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setSelectedDocument(null)}
-                  className="flex items-center gap-2 text-white hover:text-gray-300 transition"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Back to Documents
-                </button>
-              </div>
-              
-              <div className="text-white">
-                <span className="text-sm hidden md:block">{selectedDocument.file_name}</span>
-              </div>
+            {/* Doc header */}
+            <div
+              className="flex justify-between items-center p-3 sm:p-4 bg-black border-b border-gray-800"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* ✅ Back button */}
+              <button
+                onClick={() => setSelectedDocument(null)}
+                className="inline-flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </button>
+
+              <span className="text-gray-300 text-xs sm:text-sm truncate max-w-[160px] sm:max-w-xs text-center">
+                {selectedDocument.file_name}
+              </span>
 
               <button
                 onClick={() => setSelectedDocument(null)}
-                className="text-white text-3xl hover:text-gray-300 px-3"
+                className="text-white text-3xl hover:text-gray-300 transition leading-none px-2"
+                aria-label="Close document"
               >
                 ×
               </button>
             </div>
 
-            <div className="flex-1 bg-gray-900">
+            {/* ✅ Document viewer — #toolbar=0 disables Chrome PDF toolbar (download/print/save) */}
+            <div
+              className="flex-1 bg-gray-900"
+              onClick={e => e.stopPropagation()}
+            >
               <iframe
-                src={selectedDocument.url}
-                className="w-full h-full"
+                src={`${selectedDocument.url}#toolbar=0&navpanes=0&scrollbar=1`}
+                className="w-full h-full border-0"
                 title={selectedDocument.file_name}
               />
             </div>
           </div>
         )}
+
       </div>
     </div>
   )

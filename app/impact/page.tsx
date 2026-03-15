@@ -1,134 +1,165 @@
-import Link from "next/link"
 import PDFPreview from "@/components/PDFPreview"
-import FinancialChart from "@/components/FinancialChart"
 
 export default function ImpactPage() {
   return (
-    <div className="min-h-screen py-28 px-6">
+    <div className="min-h-screen py-16 sm:py-24 px-4 sm:px-6
+                    bg-white dark:bg-gray-950">
 
-      <div className="max-w-7xl mx-auto space-y-24">
+      <div className="max-w-7xl mx-auto space-y-16 sm:space-y-24">
 
-        {/* Header */}
-        <div className="text-center space-y-6">
-          <h1 className="text-5xl font-bold">
-            Impact & Accountability
+        {/* ================= HEADER ================= */}
+        <div className="text-center space-y-4 sm:space-y-6">
+          <p className="text-xs font-semibold tracking-widest uppercase text-pink-600">
+            Our Results
+          </p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+            Impact &amp; Accountability
           </h1>
-          <p className="max-w-2xl mx-auto text-lg leading-relaxed">
-            Transparency, measurable outcomes, and sustainable development 
-            remain at the core of AdeGrange Child Foundation’s mission.
+          <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 dark:text-gray-400">
+            Transparency, measurable outcomes, and sustainable development
+            remain at the core of AdeGrange Child Foundation's mission.
           </p>
         </div>
 
-        {/* Impact Metrics */}
-        <div className="grid md:grid-cols-4 gap-12 text-center">
-          <div>
-            <h3 className="text-4xl font-bold text-pink-600">10,000+</h3>
-            <p>Children Reached</p>
-          </div>
-          <div>
-            <h3 className="text-4xl font-bold text-pink-600">15+</h3>
-            <p>Years of Impact</p>
-          </div>
-          <div>
-            <h3 className="text-4xl font-bold text-pink-600">4</h3>
-            <p>Strategic Pillars</p>
-          </div>
-          <div>
-            <h3 className="text-4xl font-bold text-pink-600">2009</h3>
-            <p>Founded</p>
+        {/* ================= IMPACT METRICS ================= */}
+        {/* 2 col on mobile, 4 col on desktop */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12 text-center">
+          {[
+            { value: "10,000+", label: "Children Reached" },
+            { value: "15+",     label: "Years of Impact" },
+            { value: "4",       label: "Strategic Pillars" },
+            { value: "2009",    label: "Founded" },
+          ].map((stat, i) => (
+            <div
+              key={i}
+              className="py-6 sm:py-8 px-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900"
+            >
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-pink-600 mb-2">
+                {stat.value}
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* ================= MILESTONES TIMELINE ================= */}
+        <div className="space-y-8 sm:space-y-12">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-center text-gray-900 dark:text-white">
+            Milestones Timeline
+          </h2>
+
+          <div className="max-w-3xl mx-auto space-y-0">
+            {[
+              { year: "2009",      event: "Foundation Established" },
+              { year: "2011",      event: "First National Maternal Health Initiative" },
+              { year: "2017-2018", event: "Expanded Community Outreach Programs" },
+            ].map((milestone, i) => (
+              <div
+                key={i}
+                className="relative flex gap-4 sm:gap-6 pb-8 sm:pb-10 last:pb-0"
+              >
+                {/* Timeline line + dot */}
+                <div className="flex flex-col items-center">
+                  <div className="w-3 h-3 rounded-full bg-pink-600 mt-1 flex-shrink-0" />
+                  {i < 2 && (
+                    <div className="w-px flex-1 bg-pink-200 dark:bg-pink-900 mt-1" />
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="pb-1">
+                  <h3 className="font-bold text-sm sm:text-base text-pink-600 mb-1">
+                    {milestone.year}
+                  </h3>
+                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
+                    {milestone.event}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-<div className="space-y-12 mt-32">
-  <h2 className="text-3xl font-semibold text-center">
-    Milestones Timeline
-  </h2>
 
-  <div className="space-y-8 max-w-3xl mx-auto">
-
-    <div>
-      <h3 className="font-semibold">2009</h3>
-      <p>Foundation Established</p>
-    </div>
-
-    <div>
-      <h3 className="font-semibold">2011</h3>
-      <p>First National Maternal Health Initiative</p>
-    </div>
-
-    <div>
-      <h3 className="font-semibold">2017–2018</h3>
-      <p>Expanded Community Outreach Programs</p>
-    </div>
-
-  </div>
-</div>
-
-        {/* Annual Reports */}
-        <div className="space-y-12">
-          <h2 className="text-3xl font-semibold text-center">
+        {/* ================= ANNUAL REPORTS ================= */}
+        <div className="space-y-8 sm:space-y-12">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-center text-gray-900 dark:text-white">
             Annual Reports
-<PDFPreview file="/reports/annual-report-2011.pdf" />
-<PDFPreview file="/reports/annual-report-2017-2018.pdf" />
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-10">
+          {/* PDF Previews — stacked on mobile */}
+          <div className="space-y-4">
+            <PDFPreview file="/reports/annual-report-2011.pdf" />
+            <PDFPreview file="/reports/annual-report-2017-2018.pdf" />
+          </div>
 
-            {/* 2017-2018 */}
-            <div className="border rounded-2xl p-8 shadow-lg space-y-6">
-              <h3 className="text-2xl font-semibold">
-                Annual Report 2017–2018
-              </h3>
+          {/* Report cards — 1 col mobile, 2 col tablet+ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
 
-              <p className="leading-relaxed">
-                A comprehensive overview of programmatic milestones, 
-                community outreach, financial accountability, and strategic 
-                development initiatives during the 2017–2018 reporting cycle.
-              </p>
-
-              <a
-                href="/reports/annual-report-2017-2018.pdf"
-                target="_blank"
-                className="inline-block bg-pink-600 text-white px-6 py-3 rounded-lg"
+            {[
+              {
+                title: "Annual Report 2017-2018",
+                description: "A comprehensive overview of programmatic milestones, community outreach, financial accountability, and strategic development initiatives during the 2017-2018 reporting cycle.",
+                file: "/reports/annual-report-2017-2018.pdf"
+              },
+              {
+                title: "Annual Report 2011",
+                description: "Foundational impact report detailing early-stage community interventions, maternal health programs, and strategic establishment milestones.",
+                file: "/reports/annual-report-2011.pdf"
+              }
+            ].map((report, i) => (
+              <div
+                key={i}
+                className="rounded-2xl p-5 sm:p-8 border space-y-4 sm:space-y-6
+                           border-gray-200 dark:border-gray-800
+                           bg-white dark:bg-gray-900
+                           shadow-sm hover:shadow-md transition-shadow duration-200"
               >
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-900/20 flex items-center justify-center">
+                    <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white pt-1">
+                    {report.title}
+                  </h3>
+                </div>
 
-                Download PDF
-              </a>
-            </div>
+                <p className="text-sm sm:text-base leading-relaxed text-gray-600 dark:text-gray-400">
+                  {report.description}
+                </p>
 
-            {/* 2011 */}
-            <div className="border rounded-2xl p-8 shadow-lg space-y-6">
-              <h3 className="text-2xl font-semibold">
-                Annual Report 2011
-              </h3>
-
-              <p className="leading-relaxed">
-                Foundational impact report detailing early-stage community 
-                interventions, maternal health programs, and strategic 
-                establishment milestones.
-              </p>
-
-              <a
-                href="/reports/annual-report-2011.pdf"
-                target="_blank"
-                className="inline-block bg-pink-600 text-white px-6 py-3 rounded-lg"
-              >
-                Download PDF
-              </a>
-            </div>
+                <a
+                  href={report.file}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 active:scale-95
+                             bg-pink-600 hover:bg-pink-700 text-white"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Download PDF
+                </a>
+              </div>
+            ))}
 
           </div>
         </div>
 
-        {/* Governance Statement */}
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl font-semibold">
-            Governance & Transparency
+        {/* ================= GOVERNANCE ================= */}
+        <div className="max-w-3xl mx-auto text-center space-y-4 sm:space-y-6 py-8 sm:py-12 px-4 sm:px-8 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white">
+            Governance &amp; Transparency
           </h2>
-
-          <p className="leading-relaxed">
-            AdeGrange Child Foundation is committed to responsible stewardship, 
-            financial integrity, and measurable program outcomes. 
-            We maintain clear reporting structures and strategic accountability 
+          <p className="text-sm sm:text-base leading-relaxed text-gray-600 dark:text-gray-400">
+            AdeGrange Child Foundation is committed to responsible stewardship,
+            financial integrity, and measurable program outcomes.
+            We maintain clear reporting structures and strategic accountability
             frameworks aligned with international nonprofit governance standards.
           </p>
         </div>

@@ -10,8 +10,8 @@
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #f5f5f5;
+  --background: #111827;
+  --foreground: #f9fafb;
 }
 
 /* =========================
@@ -28,10 +28,447 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* =========================
+   COMPONENT LAYERS
+========================= */
+
 @layer components {
   .card {
-    @apply bg-white dark:bg-gray-900 
-           border border-gray-200 dark:border-gray-700
-           rounded-lg shadow-sm;
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm;
   }
 }
+
+/* =========================
+   DARK MODE — TAILWIND UTILITY OVERRIDES
+   Single definition per utility — no duplicates
+========================= */
+
+.dark .text-gray-900 { color: #ffffff   !important; }
+.dark .text-gray-800 { color: #f8fafc   !important; }
+.dark .text-gray-700 { color: #e6eef6   !important; }
+.dark .text-gray-600 { color: #9aa6b2   !important; }
+.dark .text-gray-500 { color: #8b97a2   !important; }
+.dark .text-gray-400 { color: #6b7280   !important; }
+
+/* =========================
+   DARK MODE — GLOBAL ELEMENT DEFAULTS
+   Only apply where no utility class overrides
+========================= */
+
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4 {
+  color: #ffffff;
+}
+
+.dark p {
+  color: #e5e7eb;
+}
+
+/* =========================
+   DARK MODE — CARD AND PANEL BACKGROUNDS
+========================= */
+
+.dark .bg-gray-50  { background-color: #1f2937 !important; }
+.dark .bg-gray-100 { background-color: #1f2937 !important; border-color: #374151 !important; }
+.dark .bg-gray-200 { background-color: #1f2937 !important; border-color: #374151 !important; }
+
+/* Text inside grey panels */
+.dark .bg-gray-100 *,
+.dark .bg-gray-200 * {
+  color: #f3f4f6 !important;
+}
+
+/* =========================
+   PROGRAM DETAIL PAGE
+   Targeted rules — NO blanket color:inherit
+========================= */
+
+/* Headings */
+.program-detail h1,
+.program-detail h2,
+.program-detail h3 {
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+/* Card panels */
+.program-detail .card,
+.program-detail .impact-item,
+.program-detail .doc-card {
+  background-color: #111827 !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  color: #e6eef6 !important;
+}
+
+/* Text inside cards */
+.program-detail .card *,
+.program-detail .impact-item *,
+.program-detail .doc-card * {
+  color: #e6eef6 !important;
+}
+
+/* Stat labels (Year / Location / Beneficiaries) */
+.program-detail .stat-label {
+  color: #9aa6b2 !important;
+  font-size: 0.85rem;
+}
+
+/* Stat values */
+.program-detail .stat-value {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* Impact item text */
+.program-detail .impact-item p {
+  color: #e6eef6 !important;
+}
+
+/* Document rows */
+.program-detail .doc-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+.program-detail .doc-sub {
+  color: #9aa6b2 !important;
+}
+
+/* Links */
+.program-detail a {
+  color: #7fe8ff !important;
+}
+.program-detail a:hover {
+  color: #bff3ff !important;
+  text-decoration: underline !important;
+}
+
+/* Muted inner text helper */
+.program-detail .subtle {
+  color: #9aa6b2 !important;
+}
+
+/* Force-white helper */
+.program-detail .force-white {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+
+/* =========================
+   ACCESSIBILITY
+========================= */
+
+a:focus,
+button:focus {
+  outline: 3px solid rgba(127,232,255,0.2);
+  outline-offset: 3px;
+}
+
+/* =========================
+   PROGRAM CARDS
+========================= */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Light mode card */
+.program-card {
+  background: linear-gradient(145deg, #f9fafb, #f3f4f6);
+  border-color: #e5e7eb;
+}
+.program-card:hover {
+  background: linear-gradient(145deg, #f3f4f6, #ececee);
+  border-color: #d1d5db;
+}
+
+/* Dark mode card */
+.dark .program-card {
+  background: linear-gradient(145deg, #1e2533, #1a2030);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.dark .program-card:hover {
+  background: linear-gradient(145deg, #232b3a, #1e2838);
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* =========================
+   OPEN GALLERY BUTTON FIX
+========================= */
+
+/* Prevent hover from going white in light mode */
+.program-card button:hover {
+  background-color: rgba(107, 114, 128, 0.15) !important;
+  border-color: rgba(107, 114, 128, 0.6) !important;
+  color: #111827 !important;
+}
+
+/* Dark mode hover */
+.dark .program-card button:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+/* =========================
+   ZINC UTILITY DARK MODE FIX
+   (zinc is not covered by gray mappings above)
+========================= */
+.dark .text-zinc-600 { color: #d1d5db !important; }
+.dark .text-zinc-500 { color: #e5e7eb !important; }
+.dark .text-zinc-400 { color: #9ca3af !important; }
+.dark .bg-zinc-950   { background-color: #111827 !important; }
+.dark .bg-zinc-900   { background-color: #111827 !important; }
+
+/* =========================
+   HOME PAGE DARK MODE EMERGENCY FIX
+========================= */
+
+/* Impact counter labels */
+.dark .text-zinc-400,
+.dark .text-zinc-500,
+.dark .text-zinc-600 {
+  color: #e5e7eb !important;
+}
+
+/* Impact section background */
+.dark .bg-zinc-950 {
+  background-color: #111827 !important;
+}
+.dark .bg-zinc-900 {
+  background-color: #1f2937 !important;
+}
+
+/* Mission heading — force white */
+.dark h2 {
+  color: #ffffff !important;
+}
+
+/* Mission paragraph and all body text */
+.dark p,
+.dark span,
+.dark li {
+  color: #e5e7eb !important;
+}
+
+/* Pink counter numbers — keep pink in dark mode */
+.dark .text-pink-600 {
+  color: #f472b6 !important;
+}
+/* =========================
+   HOME PAGE — SECTION BACKGROUNDS
+========================= */
+
+.impact-section {
+  background-color: #ffffff;
+}
+.dark .impact-section {
+  background-color: #111827 !important;
+}
+
+.mission-section {
+  background: linear-gradient(to bottom, #f9fafb, #ffffff);
+}
+.dark .mission-section {
+  background: linear-gradient(to bottom, #111827, #0f172a) !important;
+}
+
+/* =========================
+   HOME PAGE — TEXT COLORS
+   (bypass globals gray mapping conflict)
+========================= */
+
+/* Counter labels */
+.counter-label {
+  color: #4b5563; /* gray-600 */
+}
+.dark .counter-label {
+  color: #ffffff !important;
+}
+
+/* Mission heading */
+.mission-heading {
+  color: #111827; /* gray-900 */
+}
+.dark .mission-heading {
+  color: #ffffff !important;
+}
+
+/* Mission body paragraph */
+.mission-body {
+  color: #4b5563; /* gray-600 */
+}
+.dark .mission-body {
+  color: #e5e7eb !important; /* gray-200 — bright enough to read */
+}
+
+/* =========================
+   LEADERSHIP SECTION
+========================= */
+
+.leadership-section {
+  background-color: #f9fafb;
+}
+.dark .leadership-section {
+  background-color: #111827 !important;
+}
+
+.leadership-heading {
+  color: #111827;
+}
+.dark .leadership-heading {
+  color: #ffffff !important;
+}
+
+.leadership-sub {
+  color: #6b7280;
+}
+.dark .leadership-sub {
+  color: #d1d5db !important;
+}
+
+/* Leader cards */
+.leader-card {
+  background-color: #ffffff;
+  border: 1px solid #f3f4f6;
+}
+.dark .leader-card {
+  background-color: #1f2937 !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+.leader-name {
+  color: #111827;
+}
+.dark .leader-name {
+  color: #ffffff !important;
+}
+
+.leader-bio {
+  color: #6b7280;
+}
+.dark .leader-bio {
+  color: #9ca3af !important;
+}
+
+/* Modal */
+.modal-card {
+  background-color: #ffffff;
+}
+.dark .modal-card {
+  background-color: #1f2937 !important;
+}
+
+.modal-name {
+  color: #111827;
+}
+.dark .modal-name {
+  color: #ffffff !important;
+}
+
+.modal-bio {
+  color: #4b5563;
+}
+.dark .modal-bio {
+  color: #d1d5db !important;
+}
+/* =========================
+   PWA INSTALL PROMPT
+========================= */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* =========================
+   CONTACT PAGE DARK MODE FIX
+========================= */
+
+.contact-page {
+  background-color: #ffffff;
+}
+.dark .contact-page {
+  background-color: #0f172a !important;
+}
+
+/* Heading */
+.contact-page h1 {
+  color: #111827;
+}
+.dark .contact-page h1 {
+  color: #ffffff !important;
+}
+
+/* Subheading / description */
+.contact-page .contact-sub {
+  color: #6b7280;
+}
+.dark .contact-page .contact-sub {
+  color: #d1d5db !important;
+}
+
+/* Labels */
+.contact-page label {
+  color: #6b7280;
+}
+.dark .contact-page label {
+  color: #9ca3af !important;
+}
+
+/* Inputs and textarea */
+.contact-page input,
+.contact-page textarea {
+  background-color: #ffffff;
+  color: #111827;
+  border-color: #d1d5db;
+}
+.dark .contact-page input,
+.dark .contact-page textarea {
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  border-color: #374151 !important;
+}
+
+/* Placeholder text */
+.dark .contact-page input::placeholder,
+.dark .contact-page textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Contact detail labels */
+.contact-page .contact-detail-label {
+  color: #9ca3af;
+}
+.dark .contact-page .contact-detail-label {
+  color: #6b7280 !important;
+}
+
+/* Contact detail values */
+.contact-page .contact-detail-value {
+  color: #374151;
+}
+.dark .contact-page .contact-detail-value {
+  color: #d1d5db !important;
+}
+
+/* Divider */
+.dark .contact-page .contact-divider {
+  border-color: #1f2937 !important;
+}
+
+/* Success card */
+.dark .contact-page .success-title {
+  color: #ffffff !important;
+}
+.dark .contact-page .success-body {
+  color: #d1d5db !important;
+}
+
+

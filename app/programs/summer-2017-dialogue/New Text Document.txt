@@ -1,71 +1,101 @@
-//app/programs/summer-2017-dialogue/page.tsx
-
 "use client"
 
 import { useState } from "react"
 
-export default function Summer2017Page() {
+const tabs = [
+  { id: "day1", label: "Day 1 Gallery" },
+  { id: "day2", label: "Day 2 Gallery" },
+  { id: "video", label: "Video" },
+]
 
+export default function Summer2017Page() {
   const [tab, setTab] = useState("day1")
 
   return (
-    <div className="min-h-screen px-6 py-24 bg-white space-y-16">
+    <div className="min-h-screen px-4 sm:px-6 py-16 sm:py-24
+                    bg-white dark:bg-gray-950 space-y-10 sm:space-y-16">
 
-      <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl font-bold mb-6">
+      {/* Header */}
+      <div className="max-w-4xl mx-auto text-center space-y-4">
+        <p className="text-xs font-semibold tracking-widest uppercase text-pink-600">
+          Programs
+        </p>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white leading-tight">
           Summer 2017 Peer-to-Peer Dialogue Program
         </h1>
-        <p className="text-gray-600 text-lg">
+        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
           This initiative brought together young participants across communities
           to engage in structured dialogue, leadership development, and
           collaborative learning.
         </p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex justify-center gap-6">
-        {["day1", "day2", "video"].map((item) => (
-          <button
-            key={item}
-            onClick={() => setTab(item)}
-            className={`px-6 py-3 rounded-full ${
-              tab === item
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
-          >
-            {item === "day1" && "Day 1 Gallery"}
-            {item === "day2" && "Day 2 Gallery"}
-            {item === "video" && "Video"}
-          </button>
-        ))}
+      {/* Tabs — scrollable on mobile */}
+      <div className="flex justify-center">
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide px-4 sm:px-0 pb-1">
+          {tabs.map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className={`flex-shrink-0 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap
+                          ${tab === id
+                            ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-sm"
+                            : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                          }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="rounded-2xl overflow-hidden shadow-xl border max-w-6xl mx-auto">
+      {/* Content panel */}
+      <div className="max-w-6xl mx-auto rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-gray-800">
 
         {tab === "day1" && (
           <iframe
             src="https://drive.google.com/embeddedfolderview?id=1_psaI_D8GsCO7D9CU2wHfR6qfbHP3bog#grid"
-            className="w-full h-[650px]"
+            className="w-full h-[380px] sm:h-[500px] md:h-[600px] lg:h-[650px]"
+            title="Day 1 Gallery"
           />
         )}
 
         {tab === "day2" && (
           <iframe
             src="https://drive.google.com/embeddedfolderview?id=1KjirgKnIW9-qyRt2pvHNOY0yDxxuf9-D#grid"
-            className="w-full h-[650px]"
+            className="w-full h-[380px] sm:h-[500px] md:h-[600px] lg:h-[650px]"
+            title="Day 2 Gallery"
           />
         )}
 
         {tab === "video" && (
-          <iframe
-            className="w-full h-[600px]"
-            src="https://www.youtube.com/embed/7Xn_ZcZEfac"
-            allowFullScreen
-          />
+          /* Responsive video — maintains 16:9 ratio on all screen sizes */
+          <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src="https://www.youtube.com/embed/7Xn_ZcZEfac"
+              title="Summer 2017 Dialogue Program Video"
+              allowFullScreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            />
+          </div>
         )}
 
       </div>
+
+      {/* Back link */}
+      <div className="max-w-6xl mx-auto px-1">
+        <a
+          href="/programs"
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Programs
+        </a>
+      </div>
+
     </div>
   )
 }

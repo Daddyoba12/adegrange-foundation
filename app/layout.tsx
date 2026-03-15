@@ -2,9 +2,11 @@ import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { ThemeProvider } from "next-themes"
 import Navbar from "@/components/Navbar"
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration"
+import PWAInstallPrompt from "@/components/PWAInstallPrompt"
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://adegrangefoundation.org"), // change when domain is live
+  metadataBase: new URL("https://adegrangefoundation.org"),
 
   title: {
     default: "AdeGrange Child Foundation",
@@ -111,8 +113,7 @@ export default function RootLayout({
               "@type": "NGO",
               name: "AdeGrange Child Foundation",
               url: "https://adegrangefoundation.org",
-              logo:
-                "https://adegrangefoundation.org/images/logo.JPG",
+              logo: "https://adegrangefoundation.org/images/logo.JPG",
               description:
                 "Advancing maternal and child health through sustainable community development across Africa.",
               areaServed: "Africa",
@@ -122,15 +123,17 @@ export default function RootLayout({
         />
       </head>
 
-      <body className="min-h-screen bg-white text-gray-900 dark:bg-black dark:text-white transition-colors duration-500">
+      <body className="min-h-screen transition-colors duration-500">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Navbar />
-          
-<main className="min-h-screen transition-colors duration-500 pt-20">
+          <main className="min-h-screen transition-colors duration-500 pt-20">
             {children}
           </main>
+          <PWAInstallPrompt />
+          <ServiceWorkerRegistration />
         </ThemeProvider>
       </body>
+
     </html>
   )
 }
