@@ -8,11 +8,12 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "background_color": "#000000",
-  "theme_color": "#000000",
+  "theme_color": "#0a0a0a",
   "orientation": "portrait-primary",
   "lang": "en-GB",
   "dir": "ltr",
   "categories": ["education", "health", "nonprofit"],
+  "prefer_related_applications": false,
 
   "icons": [
     {
@@ -41,6 +42,19 @@
     }
   ],
 
+  "shortcuts": [
+    {
+      "name": "Our Programs",
+      "url": "/programs",
+      "description": "View all foundation programs and impact"
+    },
+    {
+      "name": "Contact Us",
+      "url": "/contact",
+      "description": "Get in touch with the foundation"
+    }
+  ],
+
   "screenshots": [
     {
       "src": "/images/screenshot-mobile.png",
@@ -56,7 +70,5 @@
       "form_factor": "wide",
       "label": "AdeGrange Foundation home page on desktop"
     }
-  ],
-
-  "prefer_related_applications": false
+  ]
 }
