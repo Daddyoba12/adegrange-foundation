@@ -376,6 +376,14 @@ button:focus {
   color: #d1d5db !important;
 }
 /* =========================
+   BLOG CATEGORY BADGES
+   Override the blanket .dark span rule so badge colours survive
+========================= */
+.dark .badge-health   { background-color: rgba(6,  78,  59,  0.45) !important; color: #6ee7b7 !important; }
+.dark .badge-program  { background-color: rgba(131, 24,  67,  0.45) !important; color: #f9a8d4 !important; }
+.dark .badge-thought  { background-color: rgba(76,  29,  149, 0.45) !important; color: #c4b5fd !important; }
+
+/* =========================
    PWA INSTALL PROMPT
 ========================= */
 @keyframes slideUp {

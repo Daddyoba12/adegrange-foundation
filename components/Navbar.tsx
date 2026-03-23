@@ -83,6 +83,7 @@ export default function Navbar() {
           <Link href="/about"    className="hover:text-white transition-colors duration-150">About</Link>
           <Link href="/founder"  className="hover:text-white transition-colors duration-150">Founder</Link>
           <Link href="/programs" className="hover:text-white transition-colors duration-150">Programs</Link>
+          <Link href="/blog"     className="hover:text-white transition-colors duration-150">Blog</Link>
           <Link href="/contact"  className="hover:text-white transition-colors duration-150">Contact</Link>
           <Link href="/login"    className="hover:text-white transition-colors duration-150">Login</Link>
 
@@ -115,6 +116,7 @@ export default function Navbar() {
               { href: "/about",    label: "About" },
               { href: "/founder",  label: "Founder" },
               { href: "/programs", label: "Programs" },
+              { href: "/blog",     label: "Blog" },
               { href: "/contact",  label: "Contact" },
               { href: "/login",    label: "Login" },
             ].map(({ href, label }) => (

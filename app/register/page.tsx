@@ -18,12 +18,25 @@ export default function Register() {
     setLoading(true)
     setError("")
 
+    // --- YOUR ORIGINAL LOGIC (unchanged) ---
     const { error } = await supabase.auth.signUp({ email, password })
 
     if (error) {
       setError(error.message)
       setLoading(false)
     } else {
+      // --- ADDED: send welcome email via Resend ---
+      try {
+        await fetch('/api/send-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+      } catch (emailErr) {
+        // Non-blocking — registration still succeeds even if email fails
+        console.error('Welcome email failed:', emailErr)
+      }
+
       setSuccess(true)
       setLoading(false)
       setTimeout(() => router.push("/dashboard"), 1500)
@@ -67,7 +80,8 @@ export default function Register() {
                 Account created!
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Redirecting you to your dashboard...
+                A welcome email has been sent to <strong>{email}</strong>.
+                Redirecting to your dashboard...
               </p>
             </div>
           ) : (
