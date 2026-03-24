@@ -91,14 +91,14 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6 text-gray-300 text-sm">
-          <Link href="/about"    className="hover:text-white transition-colors duration-150">About</Link>
-          <Link href="/founder"  className="hover:text-white transition-colors duration-150">Founder</Link>
+          <Link href="/about"        className="hover:text-white transition-colors duration-150">About</Link>
           <Link href="/programs"     className="hover:text-white transition-colors duration-150">Programs</Link>
           <Link href="/blog"         className="hover:text-white transition-colors duration-150">Blog</Link>
           <Link href="/partnerships" className="hover:text-white transition-colors duration-150">Partnerships</Link>
           <Link href="/contact"      className="hover:text-white transition-colors duration-150">Contact</Link>
-          <Link href="/login"    className="hover:text-white transition-colors duration-150">Login</Link>
-          <Link href="/donate"  className="px-4 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-semibold transition-colors duration-150 text-xs">
+          <Link href="/login"        className="hover:text-white transition-colors duration-150">Login</Link>
+          <Link href="/donate"
+            className="px-4 py-1.5 rounded-lg border border-pink-500/70 text-pink-400 hover:bg-pink-600 hover:text-white hover:border-pink-600 font-semibold transition-all duration-150 text-xs">
             Donate
           </Link>
 
@@ -128,8 +128,7 @@ export default function Navbar() {
         <div className="bg-black/98 border-t border-gray-800">
           <div className="flex flex-col px-6 py-4">
             {[
-              { href: "/about",    label: "About" },
-              { href: "/founder",  label: "Founder" },
+              { href: "/about",        label: "About" },
               { href: "/programs",     label: "Programs" },
               { href: "/blog",         label: "Blog" },
               { href: "/partnerships", label: "Partnerships" },
