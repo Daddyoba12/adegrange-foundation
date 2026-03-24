@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Menu, X } from "lucide-react"
 import { useTheme } from "next-themes"
 
@@ -74,8 +75,18 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href="/" className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-          AdeGrange
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/images/logo.JPG"
+            alt="AdeGrange Child Foundation"
+            width={40}
+            height={40}
+            className="rounded-lg object-cover"
+            priority
+          />
+          <span className="text-lg sm:text-xl font-bold text-white tracking-tight hidden sm:inline">
+            AdeGrange
+          </span>
         </Link>
 
         {/* Desktop Nav */}
@@ -86,6 +97,9 @@ export default function Navbar() {
           <Link href="/blog"     className="hover:text-white transition-colors duration-150">Blog</Link>
           <Link href="/contact"  className="hover:text-white transition-colors duration-150">Contact</Link>
           <Link href="/login"    className="hover:text-white transition-colors duration-150">Login</Link>
+          <Link href="/donate"  className="px-4 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-semibold transition-colors duration-150 text-xs">
+            Donate
+          </Link>
 
           {/* Sun / Moon toggle */}
           <ThemeToggle />
@@ -119,6 +133,7 @@ export default function Navbar() {
               { href: "/blog",     label: "Blog" },
               { href: "/contact",  label: "Contact" },
               { href: "/login",    label: "Login" },
+              { href: "/donate",  label: "Donate" },
             ].map(({ href, label }) => (
               <Link
                 key={href}

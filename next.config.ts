@@ -1,6 +1,8 @@
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    formats: ['image/avif', 'image/webp'], // serve modern formats for faster load
     remotePatterns: [
       {
         protocol: 'https',
@@ -17,3 +19,4 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
+

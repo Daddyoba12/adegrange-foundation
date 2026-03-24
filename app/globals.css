@@ -7,11 +7,17 @@
 :root {
   --background: #ffffff;
   --foreground: #111111;
+  /* Blog card text colours — light mode */
+  --card-title-color: #111827;
+  --card-body-color:  #4b5563;
 }
 
 .dark {
   --background: #111827;
   --foreground: #f9fafb;
+  /* Blog card text colours — dark mode */
+  --card-title-color: #ffffff;
+  --card-body-color:  #d1d5db;
 }
 
 /* =========================
@@ -382,6 +388,45 @@ button:focus {
 .dark .badge-health   { background-color: rgba(6,  78,  59,  0.45) !important; color: #6ee7b7 !important; }
 .dark .badge-program  { background-color: rgba(131, 24,  67,  0.45) !important; color: #f9a8d4 !important; }
 .dark .badge-thought  { background-color: rgba(76,  29,  149, 0.45) !important; color: #c4b5fd !important; }
+
+/* =========================
+   BLOG CARD — DARK MODE TEXT FIXES
+   Force readable text in cards regardless of global overrides
+========================= */
+/* Blog card — light mode explicit rules */
+.blog-card .blog-card-title {
+  color: #111827 !important;
+}
+.blog-card .blog-card-excerpt {
+  color: #4b5563 !important;
+}
+.blog-card .blog-card-meta,
+.blog-card .blog-card-meta span {
+  color: #6b7280 !important;
+}
+
+/* Blog card — dark mode overrides */
+.dark .blog-card {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+.dark .blog-card .blog-card-meta,
+.dark .blog-card .blog-card-meta span {
+  color: #9ca3af !important;
+}
+.dark .blog-card .blog-card-title {
+  color: #ffffff !important;
+}
+.dark .blog-card .blog-card-excerpt {
+  color: #d1d5db !important;
+}
+.dark .blog-card .blog-card-tag {
+  background-color: #374151 !important;
+  color: #d1d5db !important;
+}
+.dark .blog-card .blog-card-link {
+  color: #f9a8d4 !important;
+}
 
 /* =========================
    PWA INSTALL PROMPT

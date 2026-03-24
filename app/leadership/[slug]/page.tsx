@@ -178,9 +178,9 @@ export default async function LeadershipProfile({
                   )}
               </div>
 
-              {/* Back button */}
+              {/* Back button — returns to /?from=[slug]#leadership */}
               <div className="pt-2">
-                <BackButton />
+                <BackButton slug={slug} />
               </div>
 
             </div>

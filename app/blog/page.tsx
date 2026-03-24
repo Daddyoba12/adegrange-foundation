@@ -1,11 +1,17 @@
 'use client'
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { Search, Clock, Tag, ChevronRight, BookOpen } from "lucide-react"
-import { blogPosts, categories, formatDate, monthlyHeroImages, type BlogCategory } from "@/lib/blog-data"
+import { blogPosts, categories, formatDate, monthlyHeroImages, type BlogCategory, type BlogPost } from "@/lib/blog-data"
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const categoryColours: Record<BlogCategory, string> = {
   "Health & Tips":      "bg-emerald-100 text-emerald-700 badge-health",
@@ -20,7 +26,7 @@ function PostCard({ post, index }: { post: typeof blogPosts[0]; index: number })
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-shadow duration-300"
+      className="blog-card group flex flex-col bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-shadow duration-300"
     >
       {/* Thumbnail */}
       <div className="relative h-48 sm:h-56 overflow-hidden">
@@ -31,15 +37,17 @@ function PostCard({ post, index }: { post: typeof blogPosts[0]; index: number })
           className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-        <span className={`absolute top-3 left-3 text-xs font-semibold px-2.5 py-1 rounded-full ${categoryColours[post.category]}`}>
+        {/* Fix 2 — stronger gradient in dark mode so text stays readable */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent dark:from-black/70 dark:via-black/20" />
+        {/* Fix 3 — badge moved to bottom-right with frosted glass */}
+        <span className={`absolute bottom-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${categoryColours[post.category]}`}>
           {post.category}
         </span>
       </div>
 
       {/* Body */}
       <div className="flex flex-col flex-1 p-4 sm:p-5 gap-3">
-        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+        <div className="blog-card-meta flex items-center gap-3 text-xs text-gray-500">
           <span>{formatDate(post.date)}</span>
           <span>·</span>
           <span className="flex items-center gap-1">
@@ -48,11 +56,18 @@ function PostCard({ post, index }: { post: typeof blogPosts[0]; index: number })
           </span>
         </div>
 
-        <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white leading-snug group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors line-clamp-2">
+        {/* Fix 1 — explicit inline colour so global .dark overrides can't hide it */}
+        <h3
+          className="blog-card-title text-sm sm:text-base font-bold leading-snug group-hover:text-pink-500 transition-colors line-clamp-2"
+          style={{ color: "var(--card-title-color, #111827)" }}
+        >
           {post.title}
         </h3>
 
-        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 line-clamp-3 flex-1">
+        <p
+          className="blog-card-excerpt text-xs sm:text-sm line-clamp-3 flex-1"
+          style={{ color: "var(--card-body-color, #4b5563)" }}
+        >
           {post.excerpt}
         </p>
 
@@ -61,7 +76,7 @@ function PostCard({ post, index }: { post: typeof blogPosts[0]; index: number })
           {post.tags.slice(0, 2).map((tag) => (
             <span
               key={tag}
-              className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex items-center gap-1"
+              className="blog-card-tag text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex items-center gap-1"
             >
               <Tag size={10} />
               {tag}
@@ -71,7 +86,7 @@ function PostCard({ post, index }: { post: typeof blogPosts[0]; index: number })
 
         <Link
           href={`/blog/${post.slug}`}
-          className="mt-2 inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-pink-600 dark:text-pink-400 hover:gap-2 transition-all"
+          className="blog-card-link mt-2 inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-pink-600 dark:text-pink-400 hover:gap-2 transition-all"
         >
           Read article <ChevronRight size={14} />
         </Link>
@@ -83,17 +98,52 @@ function PostCard({ post, index }: { post: typeof blogPosts[0]; index: number })
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState<BlogCategory | "All">("All")
   const [search, setSearch] = useState("")
+  const [dynamicPosts, setDynamicPosts] = useState<BlogPost[]>([])
+
+  // Fetch any admin-published posts from Supabase
+  useEffect(() => {
+    supabase
+      .from("blog_posts")
+      .select("*")
+      .order("date", { ascending: false })
+      .then(({ data }) => {
+        if (!data) return
+        setDynamicPosts(
+          data.map((p: any) => ({
+            slug:       p.slug,
+            title:      p.title,
+            excerpt:    p.excerpt,
+            content:    p.content ?? "",
+            category:   p.category as BlogCategory,
+            author:     p.author,
+            authorRole: p.author_role ?? "",
+            date:       p.date,
+            readTime:   p.read_time ?? 5,
+            image:      p.image_url ?? "/images/blob/MainBlobpicture.jpg",
+            featured:   p.featured ?? false,
+            tags:       p.tags ?? [],
+          }))
+        )
+      })
+  }, [])
+
+  // Merge dynamic (Supabase) posts first, then static fallback
+  const allPosts = useMemo(() => {
+    const staticSlugs = new Set(blogPosts.map(p => p.slug))
+    const newOnly = dynamicPosts.filter(p => !staticSlugs.has(p.slug))
+    return [...newOnly, ...blogPosts]
+  }, [dynamicPosts])
 
   const month = new Date().getMonth()
 
   // ── Always use the fixed main blog picture as the hero ──
   const featuredImage = "/images/blob/MainBlobpicture.jpg"
-  const featuredPost = blogPosts[month % blogPosts.length]
+  const featuredPost = allPosts[month % allPosts.length]
 
   const rotatedPosts = useMemo(() => {
-    const offset = (month + 1) % blogPosts.length
-    return [...blogPosts.slice(offset), ...blogPosts.slice(0, offset)]
-  }, [month])
+    const offset = (month + 1) % allPosts.length
+    return [...allPosts.slice(offset), ...allPosts.slice(0, offset)]
+  }, [month, allPosts])
 
   const filtered = useMemo(() => {
     return rotatedPosts

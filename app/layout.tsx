@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import "./globals.css"
 import { ThemeProvider } from "next-themes"
 import Navbar from "@/components/Navbar"
+import Footer from "@/components/Footer"
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration"
 import PWAInstallPrompt from "@/components/PWAInstallPrompt"
 
@@ -129,6 +130,7 @@ export default function RootLayout({
           <main className="min-h-screen transition-colors duration-500 pt-20">
             {children}
           </main>
+          <Footer />
           <PWAInstallPrompt />
           <ServiceWorkerRegistration />
         </ThemeProvider>

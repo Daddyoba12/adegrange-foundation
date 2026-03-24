@@ -2,12 +2,25 @@
 
 import { useRouter } from 'next/navigation'
 
-export default function BackButton() {
+interface BackButtonProps {
+  /** When provided the button pushes /?from={slug}#leadership instead of router.back() */
+  slug?: string
+}
+
+export default function BackButton({ slug }: BackButtonProps) {
   const router = useRouter()
+
+  const handleClick = () => {
+    if (slug) {
+      router.push(`/?from=${slug}#leadership`)
+    } else {
+      router.back()
+    }
+  }
 
   return (
     <button
-      onClick={() => router.back()}
+      onClick={handleClick}
       className="inline-flex items-center gap-2 text-sm font-semibold text-pink-600 hover:text-pink-500 transition-colors"
     >
       <svg
@@ -23,7 +36,7 @@ export default function BackButton() {
           d="M15 19l-7-7 7-7"
         />
       </svg>
-      Back
+      Leadership
     </button>
   )
 }

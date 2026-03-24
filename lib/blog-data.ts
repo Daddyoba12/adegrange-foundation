@@ -60,7 +60,7 @@ Organisations like AdeGrange Child Foundation work in this space because the gov
     date: "2024-11-10",
     readTime: 7,
     image:
-      "https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=1200",
+      "/images/blob/eatingwell.jpg",
     featured: true,
     tags: ["Maternal Health", "Nigeria", "Public Health", "Women"],
   },
