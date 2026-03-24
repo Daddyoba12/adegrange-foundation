@@ -93,9 +93,10 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-6 text-gray-300 text-sm">
           <Link href="/about"    className="hover:text-white transition-colors duration-150">About</Link>
           <Link href="/founder"  className="hover:text-white transition-colors duration-150">Founder</Link>
-          <Link href="/programs" className="hover:text-white transition-colors duration-150">Programs</Link>
-          <Link href="/blog"     className="hover:text-white transition-colors duration-150">Blog</Link>
-          <Link href="/contact"  className="hover:text-white transition-colors duration-150">Contact</Link>
+          <Link href="/programs"     className="hover:text-white transition-colors duration-150">Programs</Link>
+          <Link href="/blog"         className="hover:text-white transition-colors duration-150">Blog</Link>
+          <Link href="/partnerships" className="hover:text-white transition-colors duration-150">Partnerships</Link>
+          <Link href="/contact"      className="hover:text-white transition-colors duration-150">Contact</Link>
           <Link href="/login"    className="hover:text-white transition-colors duration-150">Login</Link>
           <Link href="/donate"  className="px-4 py-1.5 rounded-lg bg-pink-600 hover:bg-pink-700 text-white font-semibold transition-colors duration-150 text-xs">
             Donate
@@ -129,9 +130,10 @@ export default function Navbar() {
             {[
               { href: "/about",    label: "About" },
               { href: "/founder",  label: "Founder" },
-              { href: "/programs", label: "Programs" },
-              { href: "/blog",     label: "Blog" },
-              { href: "/contact",  label: "Contact" },
+              { href: "/programs",     label: "Programs" },
+              { href: "/blog",         label: "Blog" },
+              { href: "/partnerships", label: "Partnerships" },
+              { href: "/contact",      label: "Contact" },
               { href: "/login",    label: "Login" },
               { href: "/donate",  label: "Donate" },
             ].map(({ href, label }) => (

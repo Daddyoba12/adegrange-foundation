@@ -46,6 +46,7 @@ const footerLinks = [
   { label: "Founder", href: "/founder" },
   { label: "Programs", href: "/programs" },
   { label: "Blog", href: "/blog" },
+  { label: "Partnerships", href: "/partnerships" },
   { label: "Contact", href: "/contact" },
   { label: "Donate", href: "/donate" },
 ]
@@ -124,7 +125,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-600">
           <p>© {year} AdeGrange Child Foundation. All rights reserved.</p>
-          <p>Registered non-profit organisation</p>
+          <p>Registered non-profit · Nigeria &amp; United States of America</p>
         </div>
 
       </div>
