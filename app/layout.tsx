@@ -76,11 +76,14 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  // ✅ Two theme colors — one per mode so browser chrome matches
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)",  color: "#111827" },
+  ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // ✅ Removed maximumScale and userScalable — allows accessibility zoom
 }
 
 export default function RootLayout({
@@ -101,7 +104,6 @@ export default function RootLayout({
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
-
         <meta name="msapplication-TileColor" content="#000000" />
         <meta name="msapplication-TileImage" content="/icon-192x192.png" />
 
@@ -118,16 +120,18 @@ export default function RootLayout({
               description:
                 "Advancing maternal and child health through sustainable community development across Africa.",
               areaServed: "Africa",
-              foundingDate: "2017",
+              foundingDate: "2009", // ✅ fixed — matches About page
             }),
           }}
         />
       </head>
 
+      {/* ✅ Single transition on body only — no duplicate on main */}
       <body className="min-h-screen transition-colors duration-500">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Navbar />
-          <main className="min-h-screen transition-colors duration-500 pt-20">
+          {/* ✅ pt-16 on mobile, pt-20 on sm+ — matches navbar height safely */}
+          <main className="min-h-screen pt-16 sm:pt-20">
             {children}
           </main>
           <Footer />
@@ -135,7 +139,6 @@ export default function RootLayout({
           <ServiceWorkerRegistration />
         </ThemeProvider>
       </body>
-
     </html>
   )
 }

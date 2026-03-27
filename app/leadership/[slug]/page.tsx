@@ -75,7 +75,6 @@ Deborah is passionate about youth empowerment and believes that strong financial
   },
 }
 
-// Helper — detect ALL CAPS section headings (min 4 chars, not just punctuation)
 function isSectionHeading(text: string): boolean {
   const trimmed = text.trim()
   return (
@@ -106,13 +105,24 @@ export default async function LeadershipProfile({
 
         <div className="max-w-5xl mx-auto relative z-10">
 
-          {/* Breadcrumb — truncates gracefully on small phones */}
+          {/* Back button — top of page */}
+          <div className="mb-6 sm:mb-10">
+            <BackButton slug={slug} />
+          </div>
+
+          {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs sm:text-sm mb-8 sm:mb-12 text-gray-400 dark:text-gray-500 flex-wrap">
-            <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-              Home
+            <Link
+              href="/about"
+              className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            >
+              About
             </Link>
             <span>/</span>
-            <Link href="/#leadership" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+            <Link
+              href="/about#leadership"
+              className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            >
               Leadership
             </Link>
             <span>/</span>
@@ -124,7 +134,7 @@ export default async function LeadershipProfile({
           {/* Main content grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-start">
 
-            {/* Image — shorter on mobile, taller on desktop */}
+            {/* Image */}
             <div className="relative w-full aspect-[3/2] sm:aspect-[4/3] lg:aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
               <Image
                 src={person.image}
@@ -134,7 +144,6 @@ export default async function LeadershipProfile({
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
-              {/* Subtle gradient at bottom */}
               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent" />
             </div>
 
@@ -157,8 +166,8 @@ export default async function LeadershipProfile({
                 "Leadership is measured not by position, but by impact."
               </blockquote>
 
-              {/* Bio text — section headings auto-detected */}
-              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-gray-300">
+              {/* Bio paragraphs */}
+              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base leading-relaxed">
                 {person.bio
                   .split("\n")
                   .filter((p: string) => p.trim() !== "")
@@ -166,7 +175,7 @@ export default async function LeadershipProfile({
                     isSectionHeading(paragraph) ? (
                       <h3
                         key={i}
-                        className="text-sm sm:text-base font-bold text-gray-900 dark:text-white uppercase tracking-wide pt-3 sm:pt-4 first:pt-0"
+                        className="text-sm sm:text-base font-bold text-gray-900 dark:text-white uppercase tracking-wide pt-3 sm:pt-4"
                       >
                         {paragraph}
                       </h3>
@@ -176,11 +185,6 @@ export default async function LeadershipProfile({
                       </p>
                     )
                   )}
-              </div>
-
-              {/* Back button — returns to /?from=[slug]#leadership */}
-              <div className="pt-2">
-                <BackButton slug={slug} />
               </div>
 
             </div>

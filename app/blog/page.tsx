@@ -6,12 +6,7 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { Search, Clock, Tag, ChevronRight, BookOpen } from "lucide-react"
 import { blogPosts, categories, formatDate, monthlyHeroImages, type BlogCategory, type BlogPost } from "@/lib/blog-data"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { supabase } from '@/lib/supabase'
 
 const categoryColours: Record<BlogCategory, string> = {
   "Health & Tips":      "bg-emerald-100 text-emerald-700 badge-health",

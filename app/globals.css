@@ -1,27 +1,31 @@
 @import "tailwindcss";
 
 /* =========================
-   GLOBAL THEME VARIABLES
+   DESIGN TOKENS
 ========================= */
 
 :root {
-  --background: #ffffff;
-  --foreground: #111111;
-  /* Blog card text colours — light mode */
-  --card-title-color: #111827;
-  --card-body-color:  #4b5563;
+  --bg:           #f9fafb;
+  --bg-surface:   #ffffff;
+  --bg-muted:     #f3f4f6;
+  --border:       #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted:   #9ca3af;
 }
 
 .dark {
-  --background: #111827;
-  --foreground: #f9fafb;
-  /* Blog card text colours — dark mode */
-  --card-title-color: #ffffff;
-  --card-body-color:  #d1d5db;
+  --bg:           #0f172a;
+  --bg-surface:   #111827;
+  --bg-muted:     #1f2937;
+  --border:       #374151;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --text-muted:   #6b7280;
 }
 
 /* =========================
-   BASE STYLING
+   BASE
 ========================= */
 
 html, body {
@@ -29,24 +33,25 @@ html, body {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg);
+  color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* =========================
-   COMPONENT LAYERS
-========================= */
-
-@layer components {
-  .card {
-    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm;
-  }
+/* Elite dark mode radial glow */
+.dark body {
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(236, 72, 153, 0.04),
+      transparent 40%
+    ),
+    #0f172a;
 }
 
 /* =========================
-   DARK MODE — TAILWIND UTILITY OVERRIDES
-   Single definition per utility — no duplicates
+   DARK MODE TAILWIND UTILITY OVERRIDES
+   Single source of truth — no duplicates
 ========================= */
 
 .dark .text-gray-900 { color: #ffffff   !important; }
@@ -56,9 +61,16 @@ body {
 .dark .text-gray-500 { color: #8b97a2   !important; }
 .dark .text-gray-400 { color: #6b7280   !important; }
 
+.dark .text-zinc-600 { color: #9aa6b2   !important; }
+.dark .text-zinc-500 { color: #8b97a2   !important; }
+.dark .text-zinc-400 { color: #6b7280   !important; }
+.dark .text-zinc-300 { color: #e5e7eb   !important; }
+
+.dark .text-neutral-500 { color: #9aa6b2 !important; }
+.dark .text-neutral-300 { color: #e5e7eb !important; }
+
 /* =========================
-   DARK MODE — GLOBAL ELEMENT DEFAULTS
-   Only apply where no utility class overrides
+   GLOBAL ELEMENT DEFAULTS
 ========================= */
 
 .dark h1,
@@ -73,104 +85,41 @@ body {
 }
 
 /* =========================
-   DARK MODE — CARD AND PANEL BACKGROUNDS
+   STANDARD CARD SYSTEM
+========================= */
+
+@layer components {
+
+  /* Standard card — white light / gray-900 dark */
+  .card {
+    @apply bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm;
+  }
+
+  /* Muted section band */
+  .section-muted {
+    @apply bg-gray-50 dark:bg-gray-800;
+  }
+
+  /* Standard divider */
+  .divider {
+    @apply border-t border-gray-100 dark:border-gray-800;
+  }
+
+  /* Standard page wrapper */
+  .page {
+    @apply min-h-screen py-16 sm:py-24 px-4 sm:px-6;
+  }
+}
+
+/* =========================
+   DARK MODE PANEL / BG FIXES
 ========================= */
 
 .dark .bg-gray-50  { background-color: #1f2937 !important; }
-.dark .bg-gray-100 { background-color: #1f2937 !important; border-color: #374151 !important; }
-.dark .bg-gray-200 { background-color: #1f2937 !important; border-color: #374151 !important; }
-
-/* Text inside grey panels */
-.dark .bg-gray-100 *,
-.dark .bg-gray-200 * {
-  color: #f3f4f6 !important;
-}
-
-/* =========================
-   PROGRAM DETAIL PAGE
-   Targeted rules — NO blanket color:inherit
-========================= */
-
-/* Headings */
-.program-detail h1,
-.program-detail h2,
-.program-detail h3 {
-  color: #ffffff !important;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-}
-
-/* Card panels */
-.program-detail .card,
-.program-detail .impact-item,
-.program-detail .doc-card {
-  background-color: #111827 !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
-  color: #e6eef6 !important;
-}
-
-/* Text inside cards */
-.program-detail .card *,
-.program-detail .impact-item *,
-.program-detail .doc-card * {
-  color: #e6eef6 !important;
-}
-
-/* Stat labels (Year / Location / Beneficiaries) */
-.program-detail .stat-label {
-  color: #9aa6b2 !important;
-  font-size: 0.85rem;
-}
-
-/* Stat values */
-.program-detail .stat-value {
-  color: #ffffff !important;
-  font-weight: 700 !important;
-}
-
-/* Impact item text */
-.program-detail .impact-item p {
-  color: #e6eef6 !important;
-}
-
-/* Document rows */
-.program-detail .doc-title {
-  color: #ffffff !important;
-  font-weight: 600 !important;
-}
-.program-detail .doc-sub {
-  color: #9aa6b2 !important;
-}
-
-/* Links */
-.program-detail a {
-  color: #7fe8ff !important;
-}
-.program-detail a:hover {
-  color: #bff3ff !important;
-  text-decoration: underline !important;
-}
-
-/* Muted inner text helper */
-.program-detail .subtle {
-  color: #9aa6b2 !important;
-}
-
-/* Force-white helper */
-.program-detail .force-white {
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-}
-
-/* =========================
-   ACCESSIBILITY
-========================= */
-
-a:focus,
-button:focus {
-  outline: 3px solid rgba(127,232,255,0.2);
-  outline-offset: 3px;
-}
+.dark .bg-gray-100 { background-color: #1f2937 !important; }
+.dark .bg-white    { background-color: #111827 !important; }
+.dark .bg-zinc-950 { background-color: #0f172a !important; }
+.dark .bg-zinc-900 { background-color: #111827 !important; }
 
 /* =========================
    PROGRAM CARDS
@@ -181,91 +130,72 @@ button:focus {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Light mode card */
 .program-card {
   background: linear-gradient(145deg, #f9fafb, #f3f4f6);
-  border-color: #e5e7eb;
+  border: 1px solid #e5e7eb;
 }
 .program-card:hover {
-  background: linear-gradient(145deg, #f3f4f6, #ececee);
+  background: linear-gradient(145deg, #f3f4f6, #e9eaec);
   border-color: #d1d5db;
 }
-
-/* Dark mode card */
 .dark .program-card {
   background: linear-gradient(145deg, #1e2533, #1a2030);
-  border-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255,255,255,0.06);
 }
 .dark .program-card:hover {
   background: linear-gradient(145deg, #232b3a, #1e2838);
-  border-color: rgba(255, 255, 255, 0.10);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255,255,255,0.10);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
-/* =========================
-   OPEN GALLERY BUTTON FIX
-========================= */
-
-/* Prevent hover from going white in light mode */
+/* Open Gallery button hover fix */
 .program-card button:hover {
-  background-color: rgba(107, 114, 128, 0.15) !important;
-  border-color: rgba(107, 114, 128, 0.6) !important;
-  color: #111827 !important;
+  background-color: rgba(107,114,128,0.15) !important;
+  border-color: rgba(107,114,128,0.6)      !important;
+  color: #111827                            !important;
 }
-
-/* Dark mode hover */
 .dark .program-card button:hover {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
+  background-color: rgba(255,255,255,0.08) !important;
+  border-color: rgba(255,255,255,0.3)      !important;
+  color: #ffffff                            !important;
+}
+
+/* =========================
+   PROGRAM DETAIL PAGE
+========================= */
+
+.program-detail h1,
+.program-detail h2,
+.program-detail h3 {
   color: #ffffff !important;
-}
-/* =========================
-   ZINC UTILITY DARK MODE FIX
-   (zinc is not covered by gray mappings above)
-========================= */
-.dark .text-zinc-600 { color: #d1d5db !important; }
-.dark .text-zinc-500 { color: #e5e7eb !important; }
-.dark .text-zinc-400 { color: #9ca3af !important; }
-.dark .bg-zinc-950   { background-color: #111827 !important; }
-.dark .bg-zinc-900   { background-color: #111827 !important; }
-
-/* =========================
-   HOME PAGE DARK MODE EMERGENCY FIX
-========================= */
-
-/* Impact counter labels */
-.dark .text-zinc-400,
-.dark .text-zinc-500,
-.dark .text-zinc-600 {
-  color: #e5e7eb !important;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 
-/* Impact section background */
-.dark .bg-zinc-950 {
+.program-detail .card,
+.program-detail .impact-item,
+.program-detail .doc-card {
   background-color: #111827 !important;
-}
-.dark .bg-zinc-900 {
-  background-color: #1f2937 !important;
-}
-
-/* Mission heading — force white */
-.dark h2 {
-  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  color: #e6eef6 !important;
 }
 
-/* Mission paragraph and all body text */
-.dark p,
-.dark span,
-.dark li {
-  color: #e5e7eb !important;
+.program-detail .card *,
+.program-detail .impact-item *,
+.program-detail .doc-card * {
+  color: #e6eef6 !important;
 }
 
-/* Pink counter numbers — keep pink in dark mode */
-.dark .text-pink-600 {
-  color: #f472b6 !important;
-}
+.program-detail .stat-label  { color: #9aa6b2 !important; font-size: 0.85rem; }
+.program-detail .stat-value  { color: #ffffff  !important; font-weight: 700 !important; }
+.program-detail .impact-item p { color: #e6eef6 !important; }
+.program-detail .doc-title   { color: #ffffff  !important; font-weight: 600 !important; }
+.program-detail .doc-sub     { color: #9aa6b2  !important; }
+.program-detail a            { color: #7fe8ff  !important; }
+.program-detail a:hover      { color: #bff3ff  !important; text-decoration: underline !important; }
+.program-detail .subtle      { color: #9aa6b2  !important; }
+
 /* =========================
-   HOME PAGE — SECTION BACKGROUNDS
+   HOME PAGE SECTIONS
 ========================= */
 
 .impact-section {
@@ -282,61 +212,28 @@ button:focus {
   background: linear-gradient(to bottom, #111827, #0f172a) !important;
 }
 
-/* =========================
-   HOME PAGE — TEXT COLORS
-   (bypass globals gray mapping conflict)
-========================= */
+.counter-label   { color: #4b5563; }
+.dark .counter-label { color: #ffffff !important; }
 
-/* Counter labels */
-.counter-label {
-  color: #4b5563; /* gray-600 */
-}
-.dark .counter-label {
-  color: #ffffff !important;
-}
+.mission-heading { color: #111827; }
+.dark .mission-heading { color: #ffffff !important; }
 
-/* Mission heading */
-.mission-heading {
-  color: #111827; /* gray-900 */
-}
-.dark .mission-heading {
-  color: #ffffff !important;
-}
-
-/* Mission body paragraph */
-.mission-body {
-  color: #4b5563; /* gray-600 */
-}
-.dark .mission-body {
-  color: #e5e7eb !important; /* gray-200 — bright enough to read */
-}
+.mission-body    { color: #4b5563; }
+.dark .mission-body  { color: #e5e7eb !important; }
 
 /* =========================
    LEADERSHIP SECTION
 ========================= */
 
-.leadership-section {
-  background-color: #f9fafb;
-}
-.dark .leadership-section {
-  background-color: #111827 !important;
-}
+.leadership-section { background-color: #f9fafb; }
+.dark .leadership-section { background-color: #111827 !important; }
 
-.leadership-heading {
-  color: #111827;
-}
-.dark .leadership-heading {
-  color: #ffffff !important;
-}
+.leadership-heading { color: #111827; }
+.dark .leadership-heading { color: #ffffff !important; }
 
-.leadership-sub {
-  color: #6b7280;
-}
-.dark .leadership-sub {
-  color: #d1d5db !important;
-}
+.leadership-sub  { color: #6b7280; }
+.dark .leadership-sub { color: #d1d5db !important; }
 
-/* Leader cards */
 .leader-card {
   background-color: #ffffff;
   border: 1px solid #f3f4f6;
@@ -346,182 +243,34 @@ button:focus {
   border-color: rgba(255,255,255,0.06) !important;
 }
 
-.leader-name {
-  color: #111827;
-}
-.dark .leader-name {
-  color: #ffffff !important;
-}
+.leader-name { color: #111827; }
+.dark .leader-name { color: #ffffff !important; }
 
-.leader-bio {
-  color: #6b7280;
-}
-.dark .leader-bio {
-  color: #9ca3af !important;
-}
+.leader-bio  { color: #6b7280; }
+.dark .leader-bio  { color: #9ca3af !important; }
 
-/* Modal */
-.modal-card {
-  background-color: #ffffff;
-}
-.dark .modal-card {
-  background-color: #1f2937 !important;
-}
+.modal-card  { background-color: #ffffff; }
+.dark .modal-card  { background-color: #1f2937 !important; }
 
-.modal-name {
-  color: #111827;
-}
-.dark .modal-name {
-  color: #ffffff !important;
-}
+.modal-name  { color: #111827; }
+.dark .modal-name  { color: #ffffff !important; }
 
-.modal-bio {
-  color: #4b5563;
-}
-.dark .modal-bio {
-  color: #d1d5db !important;
-}
-/* =========================
-   BLOG CATEGORY BADGES
-   Override the blanket .dark span rule so badge colours survive
-========================= */
-.dark .badge-health   { background-color: rgba(6,  78,  59,  0.45) !important; color: #6ee7b7 !important; }
-.dark .badge-program  { background-color: rgba(131, 24,  67,  0.45) !important; color: #f9a8d4 !important; }
-.dark .badge-thought  { background-color: rgba(76,  29,  149, 0.45) !important; color: #c4b5fd !important; }
+.modal-bio   { color: #4b5563; }
+.dark .modal-bio   { color: #d1d5db !important; }
 
 /* =========================
-   BLOG CARD — DARK MODE TEXT FIXES
-   Force readable text in cards regardless of global overrides
+   ZINC UTILITY DARK MODE FIX
 ========================= */
-/* Blog card — light mode explicit rules */
-.blog-card .blog-card-title {
-  color: #111827 !important;
-}
-.blog-card .blog-card-excerpt {
-  color: #4b5563 !important;
-}
-.blog-card .blog-card-meta,
-.blog-card .blog-card-meta span {
-  color: #6b7280 !important;
-}
 
-/* Blog card — dark mode overrides */
-.dark .blog-card {
-  background-color: #1f2937 !important;
-  border-color: #374151 !important;
-}
-.dark .blog-card .blog-card-meta,
-.dark .blog-card .blog-card-meta span {
-  color: #9ca3af !important;
-}
-.dark .blog-card .blog-card-title {
-  color: #ffffff !important;
-}
-.dark .blog-card .blog-card-excerpt {
-  color: #d1d5db !important;
-}
-.dark .blog-card .blog-card-tag {
-  background-color: #374151 !important;
-  color: #d1d5db !important;
-}
-.dark .blog-card .blog-card-link {
-  color: #f9a8d4 !important;
-}
+.dark .bg-zinc-950 { background-color: #0f172a !important; }
+.dark .bg-zinc-900 { background-color: #111827 !important; }
 
 /* =========================
-   PWA INSTALL PROMPT
-========================= */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(100%); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.animate-slide-up {
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* =========================
-   CONTACT PAGE DARK MODE FIX
+   ACCESSIBILITY
 ========================= */
 
-.contact-page {
-  background-color: #ffffff;
+a:focus,
+button:focus {
+  outline: 3px solid rgba(236,72,153,0.3);
+  outline-offset: 3px;
 }
-.dark .contact-page {
-  background-color: #0f172a !important;
-}
-
-/* Heading */
-.contact-page h1 {
-  color: #111827;
-}
-.dark .contact-page h1 {
-  color: #ffffff !important;
-}
-
-/* Subheading / description */
-.contact-page .contact-sub {
-  color: #6b7280;
-}
-.dark .contact-page .contact-sub {
-  color: #d1d5db !important;
-}
-
-/* Labels */
-.contact-page label {
-  color: #6b7280;
-}
-.dark .contact-page label {
-  color: #9ca3af !important;
-}
-
-/* Inputs and textarea */
-.contact-page input,
-.contact-page textarea {
-  background-color: #ffffff;
-  color: #111827;
-  border-color: #d1d5db;
-}
-.dark .contact-page input,
-.dark .contact-page textarea {
-  background-color: #1f2937 !important;
-  color: #ffffff !important;
-  border-color: #374151 !important;
-}
-
-/* Placeholder text */
-.dark .contact-page input::placeholder,
-.dark .contact-page textarea::placeholder {
-  color: #6b7280 !important;
-}
-
-/* Contact detail labels */
-.contact-page .contact-detail-label {
-  color: #9ca3af;
-}
-.dark .contact-page .contact-detail-label {
-  color: #6b7280 !important;
-}
-
-/* Contact detail values */
-.contact-page .contact-detail-value {
-  color: #374151;
-}
-.dark .contact-page .contact-detail-value {
-  color: #d1d5db !important;
-}
-
-/* Divider */
-.dark .contact-page .contact-divider {
-  border-color: #1f2937 !important;
-}
-
-/* Success card */
-.dark .contact-page .success-title {
-  color: #ffffff !important;
-}
-.dark .contact-page .success-body {
-  color: #d1d5db !important;
-}
-
-

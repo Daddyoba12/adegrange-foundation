@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
-  darkMode: 'class',          // make sure this line exists
+  darkMode: 'class',
   content: [
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -9,7 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       screens: {
-        xs: '380px',           // add this inside extend
+        xs: '380px',
+      },
+      colors: {
+        surface: {
+          light: '#ffffff',
+          dark: '#111827',
+        },
+        muted: {
+          light: '#f3f4f6',
+          dark: '#1f2937',
+        },
       },
     },
   },

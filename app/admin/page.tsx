@@ -9,22 +9,28 @@ export default function AdminPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    setTimeout(() => {
-      if (
-        password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD ||
-        password === 'admin123'
-      ) {
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      })
+
+      if (res.ok) {
         setIsAuthenticated(true)
       } else {
         setError('Invalid password. Please try again.')
       }
+    } catch (err) {
+      setError('Connection error. Please try again.')
+    } finally {
       setLoading(false)
-    }, 400)
+    }
   }
 
   if (!isAuthenticated) {
@@ -34,7 +40,7 @@ export default function AdminPage() {
 
         <div className="w-full max-w-sm">
 
-          {/* Logo / brand mark */}
+          {/* Brand mark */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-pink-600 shadow-lg mb-4">
               <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,7 +58,6 @@ export default function AdminPage() {
 
           {/* Card */}
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 sm:p-8">
-
             <form onSubmit={handleLogin} className="space-y-5">
 
               {/* Password field */}

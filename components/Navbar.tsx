@@ -10,7 +10,6 @@ function ThemeToggle({ className = "" }: { className?: string }) {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
-  // Avoid hydration mismatch — only render icon after mount
   useEffect(() => setMounted(true), [])
 
   if (!mounted) {
@@ -26,7 +25,7 @@ function ThemeToggle({ className = "" }: { className?: string }) {
       className={`relative w-9 h-9 flex items-center justify-center rounded-lg transition-all duration-200
                   hover:bg-white/10 active:scale-95 ${className}`}
     >
-      {/* Sun icon — shown in dark mode (click to go light) */}
+      {/* Sun icon — visible in dark mode */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -41,15 +40,15 @@ function ThemeToggle({ className = "" }: { className?: string }) {
         <circle cx="12" cy="12" r="4" />
         <line x1="12" y1="2"  x2="12" y2="4" />
         <line x1="12" y1="20" x2="12" y2="22" />
-        <line x1="4.22" y1="4.22"  x2="5.64" y2="5.64" />
+        <line x1="4.22"  y1="4.22"  x2="5.64"  y2="5.64" />
         <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
         <line x1="2"  y1="12" x2="4"  y2="12" />
         <line x1="20" y1="12" x2="22" y2="12" />
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+        <line x1="4.22"  y1="19.78" x2="5.64"  y2="18.36" />
         <line x1="18.36" y1="5.64"  x2="19.78" y2="4.22" />
       </svg>
 
-      {/* Moon icon — shown in light mode (click to go dark) */}
+      {/* Moon icon — visible in light mode */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -67,6 +66,15 @@ function ThemeToggle({ className = "" }: { className?: string }) {
   )
 }
 
+const navLinks = [
+  { href: "/about",        label: "About" },
+  { href: "/programs",     label: "Programs" },
+  { href: "/blog",         label: "Blog" },
+  { href: "/partnerships", label: "Partnerships" },
+  { href: "/contact",      label: "Contact" },
+  { href: "/help",        label: "help" },
+]
+
 export default function Navbar() {
   const [open, setOpen] = useState(false)
 
@@ -75,14 +83,15 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2.5">
           <Image
             src="/images/logo.JPG"
             alt="AdeGrange Child Foundation"
             width={40}
             height={40}
-            className="rounded-lg object-cover"
             priority
+            className="rounded-lg object-cover"
+            style={{ width: '40px', height: '40px' }}
           />
           <span className="text-lg sm:text-xl font-bold text-white tracking-tight hidden sm:inline">
             AdeGrange
@@ -91,18 +100,26 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6 text-gray-300 text-sm">
-          <Link href="/about"        className="hover:text-white transition-colors duration-150">About</Link>
-          <Link href="/programs"     className="hover:text-white transition-colors duration-150">Programs</Link>
-          <Link href="/blog"         className="hover:text-white transition-colors duration-150">Blog</Link>
-          <Link href="/partnerships" className="hover:text-white transition-colors duration-150">Partnerships</Link>
-          <Link href="/contact"      className="hover:text-white transition-colors duration-150">Contact</Link>
-          <Link href="/login"        className="hover:text-white transition-colors duration-150">Login</Link>
-          <Link href="/donate"
-            className="px-4 py-1.5 rounded-lg border border-pink-500/70 text-pink-400 hover:bg-pink-600 hover:text-white hover:border-pink-600 font-semibold transition-all duration-150 text-xs">
+          {navLinks.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className="hover:text-white transition-colors duration-150"
+            >
+              {label}
+            </Link>
+          ))}
+
+          {/* Donate CTA */}
+          <Link
+            href="/donate"
+            className="px-4 py-1.5 rounded-lg border border-pink-500/70 text-pink-400
+                       hover:bg-pink-600 hover:text-white hover:border-pink-600
+                       font-semibold transition-all duration-150 text-xs"
+          >
             Donate
           </Link>
 
-          {/* Sun / Moon toggle */}
           <ThemeToggle />
         </nav>
 
@@ -120,32 +137,38 @@ export default function Navbar() {
 
       </div>
 
-      {/* Mobile Menu — animated slide down */}
+      {/* Mobile Menu — smooth slide down */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out
                     ${open ? "max-h-screen opacity-100" : "max-h-0 opacity-0"}`}
       >
-        <div className="bg-black/98 border-t border-gray-800">
-          <div className="flex flex-col px-6 py-4">
-            {[
-              { href: "/about",        label: "About" },
-              { href: "/programs",     label: "Programs" },
-              { href: "/blog",         label: "Blog" },
-              { href: "/partnerships", label: "Partnerships" },
-              { href: "/contact",      label: "Contact" },
-              { href: "/login",    label: "Login" },
-              { href: "/donate",  label: "Donate" },
-            ].map(({ href, label }) => (
+        <div className="bg-black border-t border-gray-800">
+          <nav className="flex flex-col px-6 py-4">
+
+            {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setOpen(false)}
-                className="py-3.5 border-b border-gray-800/60 text-gray-300 hover:text-white transition-colors duration-150 text-sm"
+                className="py-3.5 border-b border-gray-800/60 text-gray-300 hover:text-white
+                           transition-colors duration-150 text-sm"
               >
                 {label}
               </Link>
             ))}
-          </div>
+
+            {/* Donate — full width pink button in mobile menu */}
+            <Link
+              href="/donate"
+              onClick={() => setOpen(false)}
+              className="mt-5 w-full text-center py-3 rounded-xl font-semibold text-sm
+                         bg-pink-600 hover:bg-pink-700 active:scale-95
+                         text-white transition-all duration-150"
+            >
+              Donate
+            </Link>
+
+          </nav>
         </div>
       </div>
 
