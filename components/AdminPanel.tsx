@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react'
 import {
   Upload, FileText, BookOpen, LogOut, CheckCircle, AlertCircle,
   Image as ImageIcon, Mail, Users, Shield, HelpCircle, Trash2,
-  Eye, EyeOff, Plus, AlertTriangle, Pencil
+  Eye, EyeOff, Plus, AlertTriangle, Pencil, BookMarked, ChevronDown
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface AdminPanelProps { onLogout: () => void }
-type Tab = 'media' | 'blog' | 'program' | 'messages' | 'registrations' | 'software' | 'help'
+type Tab = 'media' | 'blog' | 'program' | 'messages' | 'registrations' | 'software' | 'help' | 'guide'
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
@@ -72,20 +72,76 @@ function MediaTab() {
   const [msg, setMsg] = useState('')
   const [programs, setPrograms] = useState<{ value: string; label: string }[]>([])
 
-  useEffect(() => {
-    supabase
+  // Inline new-program form
+  const [showNewProgram, setShowNewProgram] = useState(false)
+  const [newProg, setNewProg] = useState({ title: '', slug: '', year: '' })
+  const [savingProg, setSavingProg] = useState(false)
+  const [progMsg, setProgMsg] = useState('')
+
+  // Existing media for selected program
+  const [existingMedia, setExistingMedia] = useState<any[]>([])
+  const [mediaLoading, setMediaLoading] = useState(false)
+
+  useEffect(() => { loadPrograms() }, [])
+
+  async function loadPrograms() {
+    const { data } = await supabase
       .from('programs')
       .select('slug, title, year')
       .order('year', { ascending: true })
-      .then(({ data }) => {
-        setPrograms(
-          (data || []).map(p => ({
-            value: p.slug,
-            label: `${p.year ? p.year + ' - ' : ''}${p.title}`,
-          }))
-        )
-      })
-  }, [])
+    setPrograms(
+      (data || []).map(p => ({
+        value: p.slug,
+        label: `${p.year ? p.year + ' — ' : ''}${p.title}`,
+      }))
+    )
+  }
+
+  async function handleProgramSelect(slug: string) {
+    setProgramId(slug)
+    if (!slug) { setExistingMedia([]); return }
+    setMediaLoading(true)
+    const { data } = await supabase
+      .from('program_media')
+      .select('*')
+      .eq('program_id', slug)
+      .order('created_at', { ascending: false })
+    const enriched = (data || []).map(item => {
+      const bucket = item.media_type === 'image' ? 'program-images' : 'program-documents'
+      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(item.media_url)
+      return { ...item, url: urlData.publicUrl }
+    })
+    setExistingMedia(enriched)
+    setMediaLoading(false)
+  }
+
+  async function deleteMedia(item: any) {
+    if (!confirm(`Delete "${item.file_name}"? This cannot be undone.`)) return
+    const bucket = item.media_type === 'image' ? 'program-images' : 'program-documents'
+    await supabase.storage.from(bucket).remove([item.media_url])
+    await supabase.from('program_media').delete().eq('id', item.id)
+    setExistingMedia(prev => prev.filter(m => m.id !== item.id))
+  }
+
+  async function createProgram(e: React.FormEvent) {
+    e.preventDefault()
+    setSavingProg(true)
+    setProgMsg('')
+    const { error } = await supabase.from('programs').insert({
+      title: newProg.title,
+      slug: newProg.slug,
+      year: newProg.year,
+      description: '',
+    })
+    setSavingProg(false)
+    if (error) { setProgMsg('⚠ ' + error.message); return }
+    setProgMsg('✅ Program created!')
+    await loadPrograms()
+    setProgramId(newProg.slug)
+    handleProgramSelect(newProg.slug)
+    setNewProg({ title: '', slug: '', year: '' })
+    setShowNewProgram(false)
+  }
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
@@ -118,37 +174,141 @@ function MediaTab() {
       else successCount++
     }
 
-    setMsg(errorCount === 0
+    const resultMsg = errorCount === 0
       ? `✅ ${successCount} file(s) uploaded successfully.`
-      : `⚠ ${successCount} uploaded, ${errorCount} failed.`)
+      : `⚠ ${successCount} uploaded, ${errorCount} failed.`
+    setMsg(resultMsg)
     setLoading(false)
+    // Refresh the existing media list
+    if (programId) handleProgramSelect(programId)
   }
 
   return (
-    <form onSubmit={handleUpload} className="space-y-5">
-      <Field label="Program">
-        <select value={programId} onChange={e => setProgramId(e.target.value)}
-          required className={inputCls}>
-          <option value="">Select program</option>
-          {programs.map(p => (
-            <option key={p.value} value={p.value}>{p.label}</option>
-          ))}
-        </select>
-      </Field>
-      <Field label="Folder Name (optional)">
-        <input type="text" value={folderName}
-          onChange={e => setFolderName(e.target.value)}
-          placeholder="e.g. gallery-2017" className={inputCls} />
-      </Field>
-      <Field label="Files">
-        <input type="file" multiple
-          onChange={e => setFiles(e.target.files)}
-          className={fileCls}
-          accept="image/*,.pdf,.doc,.docx" />
-      </Field>
-      {msg && <StatusBanner msg={msg} />}
-      <SubmitBtn loading={loading} label="Upload Files" loadingLabel="Uploading..." />
-    </form>
+    <div className="space-y-6">
+
+      {/* ── Upload form ─────────────────────────────────────── */}
+      <form onSubmit={handleUpload} className="space-y-5">
+
+        {/* Program selector + inline create */}
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">
+            Program
+          </label>
+          <select value={programId}
+            onChange={e => handleProgramSelect(e.target.value)}
+            required className={inputCls}>
+            <option value="">Select program</option>
+            {programs.map(p => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+
+          {/* Inline "create new program" toggle */}
+          <button type="button"
+            onClick={() => setShowNewProgram(s => !s)}
+            className="mt-2 flex items-center gap-1.5 text-xs text-pink-600 hover:text-pink-500 font-semibold">
+            <Plus size={12} />
+            {showNewProgram ? 'Cancel — hide form' : 'Program not listed? Create it here'}
+          </button>
+
+          {showNewProgram && (
+            <div className="mt-3 p-4 rounded-xl border border-pink-200 dark:border-pink-800 bg-pink-50 dark:bg-pink-900/10 space-y-3">
+              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Quick-create a new program</p>
+              <div className="grid grid-cols-1 min-[480px]:grid-cols-3 gap-3">
+                <input placeholder="Program title" value={newProg.title}
+                  onChange={e => setNewProg(p => ({ ...p, title: e.target.value }))}
+                  className={inputCls} />
+                <input placeholder="Slug (e.g. 2025-new-drive)" value={newProg.slug}
+                  onChange={e => setNewProg(p => ({ ...p, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
+                  className={inputCls} />
+                <input placeholder="Year (e.g. 2025)" value={newProg.year}
+                  onChange={e => setNewProg(p => ({ ...p, year: e.target.value }))}
+                  className={inputCls} />
+              </div>
+              {progMsg && <StatusBanner msg={progMsg} />}
+              <button type="button" onClick={createProgram} disabled={savingProg || !newProg.title || !newProg.slug}
+                className="w-full py-2.5 rounded-xl font-semibold text-white text-sm bg-pink-600 hover:bg-pink-700 disabled:opacity-50 transition">
+                {savingProg ? 'Creating…' : 'Create Program & Select It'}
+              </button>
+              <p className="text-[11px] text-gray-400">You can add full details (description, location, impact) later in the Program Manager tab.</p>
+            </div>
+          )}
+        </div>
+
+        <Field label="Folder Name (optional)">
+          <input type="text" value={folderName}
+            onChange={e => setFolderName(e.target.value)}
+            placeholder="e.g. gallery-2025" className={inputCls} />
+        </Field>
+        <Field label="Files">
+          <input type="file" multiple
+            onChange={e => setFiles(e.target.files)}
+            className={fileCls}
+            accept="image/*,.pdf,.doc,.docx" />
+        </Field>
+        {msg && <StatusBanner msg={msg} />}
+        <SubmitBtn loading={loading} label="Upload Files" loadingLabel="Uploading..." />
+      </form>
+
+      {/* ── Existing files for selected program ─────────────── */}
+      {programId && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              Uploaded Files
+            </h3>
+            <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+              {existingMedia.length} file{existingMedia.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {mediaLoading && (
+            <p className="text-sm text-gray-400 py-4 text-center">Loading files…</p>
+          )}
+
+          {!mediaLoading && existingMedia.length === 0 && (
+            <p className="text-sm text-gray-400 dark:text-gray-500 text-center py-4">
+              No files uploaded for this program yet.
+            </p>
+          )}
+
+          {!mediaLoading && existingMedia.length > 0 && (
+            <div className="space-y-2">
+              {existingMedia.map(item => (
+                <div key={item.id}
+                  className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                  {/* Thumbnail or doc icon */}
+                  {item.media_type === 'image' ? (
+                    <img src={item.url} alt={item.file_name}
+                      className="w-10 h-10 rounded-lg object-cover flex-shrink-0 border border-gray-200 dark:border-gray-700" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-gray-800 flex-shrink-0 text-lg">
+                      📄
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{item.file_name}</p>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-wide mt-0.5">{item.media_type}</p>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <a href={item.url} target="_blank" rel="noopener noreferrer"
+                      className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-400 hover:text-blue-500"
+                      title="View file">
+                      <Eye size={14} />
+                    </a>
+                    <button onClick={() => deleteMedia(item)}
+                      className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition text-gray-400 hover:text-red-500"
+                      title="Delete file">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -1033,6 +1193,269 @@ function HelpTab() {
   )
 }
 
+// ─── Tab: User Guide ─────────────────────────────────────────────────────────
+
+function GuideTab() {
+  const [open, setOpen] = useState<number | null>(0)
+
+  const sections = [
+    {
+      title: '1 — How to Log In',
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Before you can manage anything, you need to log in to this admin panel. It is a private area only you can access.
+          </p>
+          <ol className="space-y-2 ml-1">
+            {[
+              'Open any web browser (Chrome, Safari, Edge — all work).',
+              'Go to your website address and add /admin at the end — e.g. adegrangecf.org/admin',
+              'Type in the admin password and click Log In.',
+              'You are now inside the admin panel. Use the tabs on the left to navigate.',
+            ].map((s, i) => (
+              <li key={i} className="flex gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-pink-600 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+          <div className="p-3 rounded-xl bg-pink-50 dark:bg-pink-900/10 border border-pink-200 dark:border-pink-800 text-xs text-gray-700 dark:text-gray-300">
+            💡 Keep the password safe — do not share it with anyone who should not have website access.
+          </div>
+        </div>
+      )
+    },
+    {
+      title: '2 — Uploading Photos & Documents',
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Use the <strong>Media Upload</strong> tab to add photos and documents to any program. They appear on the live website instantly.
+          </p>
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Allowed file types</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">Photos: JPG, PNG, GIF, WebP, BMP &nbsp;|&nbsp; Documents: PDF, DOC, DOCX</p>
+          <ol className="space-y-2 ml-1">
+            {[
+              'Click the Media Upload tab.',
+              'Choose a program from the dropdown. If your program is not listed, click "Program not listed? Create it here" to add it on the spot.',
+              'Optionally type a Folder Name to group files — e.g. "gallery-2024". Leave it blank if unsure.',
+              'Click Choose Files and select one or more files from your computer.',
+              'Click Upload Files. A green message confirms success.',
+              'To delete a file: select the program, find the file in the list below, and click the red bin icon.',
+            ].map((s, i) => (
+              <li key={i} className="flex gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-pink-600 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+          <div className="p-3 rounded-xl bg-pink-50 dark:bg-pink-900/10 border border-pink-200 dark:border-pink-800 text-xs text-gray-700 dark:text-gray-300">
+            💡 Photos show in the Gallery Preview. Documents show in the Reports & Documents section of the program page.
+          </div>
+        </div>
+      )
+    },
+    {
+      title: '3 — Writing & Publishing Blog Posts',
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Use the <strong>Blog</strong> tab to write news, stories, and updates. You control when each post goes live.
+          </p>
+          <ol className="space-y-2 ml-1">
+            {[
+              'Click the Blog tab, then click the pink New Post button.',
+              'Title — the headline visitors see. E.g. "Girls Health Matter Reaches 300 Students".',
+              'Slug — the web address for this post. Use lowercase with hyphens. E.g. "girls-health-matter-300-students".',
+              'Excerpt — a short 1–2 sentence summary shown on the blog listing page.',
+              'Content — the full article body.',
+              'Tick "Publish immediately" to make it live now, or leave it as a draft.',
+              'Click Save Post. A green message confirms it was saved.',
+              'To publish a draft later: find it in the list and click the eye icon (👁).',
+              'To delete a post: click the red bin icon and confirm.',
+            ].map((s, i) => (
+              <li key={i} className="flex gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-pink-600 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )
+    },
+    {
+      title: '4 — Adding & Editing Programs',
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            Use the <strong>Program Manager</strong> tab to add new programs or update existing ones. Changes go live immediately — no developer needed.
+          </p>
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-2">To add a new program</p>
+          <ol className="space-y-2 ml-1">
+            {[
+              'Click Program Manager, then click the pink Add Program button.',
+              'Fill in: Title, URL Slug (lowercase, hyphens only), Year, Location, Beneficiaries.',
+              'Short Description — 1–2 sentences shown on the Programs listing page.',
+              'Full Description — a longer paragraph shown on the program\'s own detail page.',
+              'Key Impact Points — type each achievement on its own line, one per line.',
+              'Click Save Program. It appears on the website straight away.',
+              'Then go to Media Upload to add photos for this program.',
+            ].map((s, i) => (
+              <li key={i} className="flex gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-pink-600 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-2">To edit an existing program</p>
+          <p className="text-sm text-gray-700 dark:text-gray-300">Find it in the list → click the pencil icon → update fields → click Update Program.</p>
+          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 text-xs text-gray-700 dark:text-gray-300">
+            ⚠ Deleting a program removes it from the website permanently. Uploaded photos are not deleted automatically.
+          </div>
+        </div>
+      )
+    },
+    {
+      title: '5 — Reading Contact Messages',
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            When someone submits the contact form on your website, their message is saved in the <strong>Messages</strong> tab. Unread messages are highlighted in pink.
+          </p>
+          <ol className="space-y-2 ml-1">
+            {[
+              'Click the Messages tab to see all messages.',
+              'Unread messages are highlighted in pink with a "New" badge.',
+              'Click on a message to expand and read the full content.',
+              'Click the eye icon to mark it as read or unread.',
+              'Click the email address link to open your email app and reply directly.',
+              'Click the bin icon to delete a message you no longer need.',
+            ].map((s, i) => (
+              <li key={i} className="flex gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-pink-600 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+          <div className="p-3 rounded-xl bg-pink-50 dark:bg-pink-900/10 border border-pink-200 dark:border-pink-800 text-xs text-gray-700 dark:text-gray-300">
+            💡 Check Messages regularly so you do not miss enquiries from the public or potential partners.
+          </div>
+        </div>
+      )
+    },
+    {
+      title: '6 — Registrations',
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            The <strong>Registrations</strong> tab keeps a record of donors, visitors, and registered users. You can add records manually or view ones submitted through the website.
+          </p>
+          <ol className="space-y-2 ml-1">
+            {[
+              'Click Registrations, then click Add Record.',
+              'Fill in the person\'s Full Name and Email Address.',
+              'Choose Type — Visitor, Donor, or Registered.',
+              'If they donated, enter the Amount in GBP.',
+              'Add any Notes (e.g. how you met them, what they are interested in).',
+              'Click Save. The record appears in the list immediately.',
+            ].map((s, i) => (
+              <li key={i} className="flex gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-pink-600 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )
+    },
+    {
+      title: '7 — Software & Subscription Tracker',
+      content: (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            The <strong>Software Tracker</strong> keeps track of all online services the foundation uses — hosting, domains, email, and any subscriptions. It alerts you before anything expires.
+          </p>
+          <ol className="space-y-2 ml-1">
+            {[
+              'Click Software Tracker, then Add Service.',
+              'Service Name — e.g. "Website Hosting" or "Domain Name".',
+              'Category — Hosting, Domain, Email, CRM, Analytics, Design, or Other.',
+              'Login URL — the web address where you manage this service.',
+              'Username and Password Hint (just a clue, not the full password).',
+              'Responsible Person — who manages this account.',
+              'Start Date and Expiry Date — when the subscription began and when it expires.',
+              'Notification Email — the address that receives renewal reminders.',
+              'Add Notes, then save.',
+            ].map((s, i) => (
+              <li key={i} className="flex gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-pink-600 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                {s}
+              </li>
+            ))}
+          </ol>
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            <div className="p-2.5 rounded-xl bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-700 text-xs text-yellow-800 dark:text-yellow-300">
+              🟡 Yellow card = expiring within 30 days. Act soon.
+            </div>
+            <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-300">
+              🔴 Red card = already expired. Renew immediately.
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: '8 — Quick Reference',
+      content: (
+        <div className="space-y-2">
+          {[
+            ['Upload a photo or document', 'Media Upload → select program → choose file → Upload Files'],
+            ['Delete an uploaded file', 'Media Upload → select program → find file in list → bin icon'],
+            ['Add a new program', 'Program Manager → Add Program → fill in all fields → Save'],
+            ['Edit an existing program', 'Program Manager → pencil icon → update → Save'],
+            ['Write a blog post', 'Blog → New Post → fill in fields → Save Post'],
+            ['Publish a draft post', 'Blog → find post → eye icon (👁)'],
+            ['Read a contact message', 'Messages → click the message'],
+            ['Reply to a message', 'Messages → click the email address link'],
+            ['Add a donor/visitor record', 'Registrations → Add Record → fill in → Save'],
+            ['Check subscription expiries', 'Software Tracker → review yellow/red cards'],
+            ['Log out', 'Click Logout button — top right corner'],
+          ].map(([task, where]) => (
+            <div key={task} className="grid grid-cols-5 gap-2 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800">
+              <div className="col-span-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 text-xs font-semibold text-gray-700 dark:text-gray-300">{task}</div>
+              <div className="col-span-3 px-3 py-2 bg-white dark:bg-gray-900 text-xs text-gray-500 dark:text-gray-400">{where}</div>
+            </div>
+          ))}
+        </div>
+      )
+    },
+  ]
+
+  return (
+    <div className="space-y-3 max-w-2xl">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        Step-by-step guide for managing all parts of the website — no technical knowledge needed.
+      </p>
+      {sections.map((section, i) => (
+        <div key={i} className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <button
+            onClick={() => setOpen(open === i ? null : i)}
+            className="w-full flex items-center justify-between gap-3 px-4 py-4 text-left
+                       bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            <span className="text-sm font-semibold text-gray-900 dark:text-white">{section.title}</span>
+            <ChevronDown size={16} className={`flex-shrink-0 text-gray-400 transition-transform duration-200 ${open === i ? 'rotate-180' : ''}`} />
+          </button>
+          {open === i && (
+            <div className="px-4 pb-4 pt-2 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+              {section.content}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── Main AdminPanel ──────────────────────────────────────────────────────────
 
 export default function AdminPanel({ onLogout }: AdminPanelProps) {
@@ -1043,9 +1466,10 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
     { id: 'blog',          label: 'Blog',               shortLabel: 'Blog',     icon: <BookOpen size={16} /> },
     { id: 'program',       label: 'Program Manager',    shortLabel: 'Programs', icon: <FileText size={16} /> },
     { id: 'messages',      label: 'Messages',           shortLabel: 'Messages', icon: <Mail size={16} /> },
-    { id: 'registrations', label: 'Registrations',      shortLabel: 'Regs',  icon: <Users size={16} /> },
+    { id: 'registrations', label: 'Registrations',      shortLabel: 'Regs',    icon: <Users size={16} /> },
     { id: 'software',      label: 'Software Tracker',   shortLabel: 'Software', icon: <Shield size={16} /> },
-    { id: 'help',          label: 'Help',               shortLabel: 'Help',     icon: <HelpCircle size={16} /> },
+    { id: 'help',          label: 'Help & FAQ',         shortLabel: 'Help',     icon: <HelpCircle size={16} /> },
+    { id: 'guide',         label: 'User Guide',         shortLabel: 'Guide',    icon: <BookMarked size={16} /> },
   ]
 
   const titles: Record<Tab, string> = {
@@ -1056,6 +1480,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
     registrations: 'Registrations',
     software:      'Software Tracker',
     help:          'Help & FAQ',
+    guide:         'User Guide',
   }
 
   return (
@@ -1128,6 +1553,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
         {t.id === 'registrations' && <Users size={18} />}
         {t.id === 'software'      && <Shield size={18} />}
         {t.id === 'help'          && <HelpCircle size={18} />}
+        {t.id === 'guide'         && <BookMarked size={18} />}
       </span>
       {t.shortLabel}
     </button>
@@ -1156,6 +1582,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
           {tab === 'registrations' && <RegistrationsTab />}
           {tab === 'software'      && <SoftwareTracker />}
           {tab === 'help'          && <HelpTab />}
+          {tab === 'guide'         && <GuideTab />}
 
         </main>
       </div>
