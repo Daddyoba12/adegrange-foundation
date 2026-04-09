@@ -6,84 +6,22 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 
-const programsData = {
-  '2017-full-life-nursery': {
-    title: '2017 Partnership - Full Life Nursery & Primary School',
-    description: 'Supporting early childhood education through community partnership and engagement.',
-    fullDescription: `The Full Life Nursery & Primary School partnership represents our commitment to early childhood development and educational excellence. Through community engagement and sustainable support, we've helped establish a foundation for quality education that serves hundreds of children annually.`,
-    year: '2017',
-    location: 'Nigeria',
-    beneficiaries: '150+ children',
-    impact: [
-      'Provided educational materials and supplies',
-      'Enhanced classroom facilities',
-      'Supported teacher training programs',
-      'Established sustainable community engagement model'
-    ]
-  },
-  '2018-young-shapers-club': {
-    title: '2018 Partnership - Young Shapers Club',
-    description: 'Empowering youth leadership and structured development through mentorship initiatives.',
-    fullDescription: `The Young Shapers Club partnership focuses on empowering displaced youth through structured leadership development and educational support. This program provides mentorship, educational resources, and leadership training to build resilient communities.`,
-    year: '2018',
-    location: 'Nigeria',
-    beneficiaries: '200+ youth',
-    impact: [
-      "Financed IDP children's education",
-      'Established youth leadership programs',
-      'Provided mentorship opportunities',
-      'Created sustainable development pathways'
-    ]
-  },
-  '2017-peer-to-peer': {
-    title: 'Summer 2017 - Peer-to-Peer Dialogue Program',
-    description: 'Promoting cross-community dialogue and youth participation in leadership development.',
-    fullDescription: `Our Peer-to-Peer Dialogue Program brings together youth from diverse backgrounds to foster understanding, build leadership skills, and promote peaceful coexistence. Through structured dialogue sessions and collaborative activities, participants develop critical thinking and conflict resolution skills.`,
-    year: '2017',
-    location: 'Nigeria',
-    beneficiaries: '100+ youth',
-    impact: [
-      'Facilitated cross-community dialogue sessions',
-      'Trained youth leaders in conflict resolution',
-      'Built sustainable peace-building networks',
-      'Documented best practices for youth engagement'
-    ]
-  },
-  '2019-girls-health-matter': {
-    title: 'Summer 2019 - Girls Health Matter',
-    description: 'Advancing adolescent health awareness and educational support for girls.',
-    fullDescription: `The Girls Health Matter program addresses critical gaps in adolescent health education and support. Through school-based interventions, we provide girls with essential knowledge, resources, and support systems to make informed decisions about their health and well-being.`,
-    year: '2019',
-    location: 'Kubwa & Byazin, Nigeria',
-    beneficiaries: '300+ girls',
-    impact: [
-      'Conducted health awareness workshops',
-      'Distributed hygiene and health supplies',
-      'Established school health clubs',
-      'Created sustainable support networks'
-    ]
-  },
-  '2019-feeding-project': {
-    title: '2019 Feeding Project - Chicago, Illinois',
-    description: 'International outreach initiative supporting families through structured feeding and welfare services.',
-    fullDescription: `Our Chicago Feeding Project extends our mission internationally, addressing food insecurity among vulnerable families. Through partnerships with local organizations, we provide nutritious meals and connect families with long-term support services.`,
-    year: '2019',
-    location: 'Chicago, Illinois, USA',
-    beneficiaries: '500+ families',
-    impact: [
-      'Provided nutritious meals to families in need',
-      'Connected families with social services',
-      'Built international partnership networks',
-      'Established replicable feeding program model'
-    ]
-  }
+interface Program {
+  title: string
+  description: string
+  full_description: string
+  year: string
+  location: string
+  beneficiaries: string
+  impact: string[]
 }
 
 export default function ProgramDetailPage() {
   const params = useParams()
   const programId = params.id as string
-  const program = programsData[programId as keyof typeof programsData]
 
+  const [program, setProgram] = useState<Program | null>(null)
+  const [programLoading, setProgramLoading] = useState(true)
   const [media, setMedia] = useState<{
     images: any[]
     documents: any[]
@@ -93,9 +31,21 @@ export default function ProgramDetailPage() {
   const [selectedImage, setSelectedImage] = useState<any>(null)
 
   useEffect(() => {
+    loadProgram()
     loadMedia()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [programId])
+
+  async function loadProgram() {
+    setProgramLoading(true)
+    const { data } = await supabase
+      .from('programs')
+      .select('*')
+      .eq('slug', programId)
+      .single()
+    setProgram(data || null)
+    setProgramLoading(false)
+  }
 
   async function loadMedia() {
     try {
@@ -141,6 +91,17 @@ export default function ProgramDetailPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (programLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center">
+          <div className="inline-block w-6 h-6 border-2 border-gray-300 border-t-pink-600 rounded-full animate-spin" />
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">Loading program...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!program) {
@@ -217,7 +178,7 @@ export default function ProgramDetailPage() {
             About the Program
           </h2>
           <p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-            {program.fullDescription}
+            {program.full_description}
           </p>
         </section>
 

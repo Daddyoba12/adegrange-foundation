@@ -70,14 +70,22 @@ function MediaTab() {
   const [files, setFiles] = useState<FileList | null>(null)
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
+  const [programs, setPrograms] = useState<{ value: string; label: string }[]>([])
 
-  const programs = [
-    { value: '2017-full-life-nursery',   label: '2017 - Full Life Nursery' },
-    { value: '2018-young-shapers-club',  label: '2018 - Young Shapers Club' },
-    { value: '2017-peer-to-peer',        label: '2017 - Peer-to-Peer Dialogue' },
-    { value: '2019-girls-health-matter', label: '2019 - Girls Health Matter' },
-    { value: '2019-feeding-project',     label: '2019 - Feeding Project Chicago' },
-  ]
+  useEffect(() => {
+    supabase
+      .from('programs')
+      .select('slug, title, year')
+      .order('year', { ascending: true })
+      .then(({ data }) => {
+        setPrograms(
+          (data || []).map(p => ({
+            value: p.slug,
+            label: `${p.year ? p.year + ' - ' : ''}${p.title}`,
+          }))
+        )
+      })
+  }, [])
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault()
@@ -201,7 +209,7 @@ function BlogTab() {
         <form onSubmit={handleSave}
           className="space-y-4 p-4 rounded-xl border border-pink-200 dark:border-pink-800 bg-pink-50 dark:bg-pink-900/10">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">New Blog Post</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
             <input type="text" placeholder="Title" required value={form.title}
               onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={inputCls} />
             <input type="text" placeholder="Slug (e.g. my-post)" required value={form.slug}
@@ -270,17 +278,24 @@ function BlogTab() {
 
 // ─── Tab: Program Manager ─────────────────────────────────────────────────────
 
+const emptyProgram = {
+  title: '', slug: '', description: '',
+  year: '', location: '', beneficiaries: '',
+  full_description: '', impact_text: ''
+}
+
 function ProgramTab() {
   const [programs, setPrograms] = useState<any[]>([])
-  const [form, setForm] = useState({ title: '', slug: '', description: '' })
+  const [form, setForm] = useState(emptyProgram)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [msg, setMsg] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showForm, setShowForm] = useState(false)
 
   useEffect(() => { fetchPrograms() }, [])
 
   async function fetchPrograms() {
-    const { data } = await supabase.from('programs').select('*')
+    const { data } = await supabase.from('programs').select('*').order('year', { ascending: true })
     setPrograms(data || [])
   }
 
@@ -288,72 +303,194 @@ function ProgramTab() {
     e.preventDefault()
     setSaving(true)
     setMsg('')
+
+    // Convert the impact textarea (one per line) into an array
+    const impact = form.impact_text
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean)
+
+    const payload = {
+      title: form.title,
+      slug: form.slug,
+      description: form.description,
+      year: form.year,
+      location: form.location,
+      beneficiaries: form.beneficiaries,
+      full_description: form.full_description,
+      impact,
+    }
+
     if (editingId) {
-      const { error } = await supabase.from('programs').update(form).eq('id', editingId)
+      const { error } = await supabase.from('programs').update(payload).eq('id', editingId)
       setMsg(error ? '⚠ Error: ' + error.message : '✅ Program updated.')
     } else {
-      const { error } = await supabase.from('programs').insert(form)
+      const { error } = await supabase.from('programs').insert(payload)
       setMsg(error ? '⚠ Error: ' + error.message : '✅ Program added.')
     }
     setSaving(false)
-    setForm({ title: '', slug: '', description: '' })
+    setForm(emptyProgram)
     setEditingId(null)
+    setShowForm(false)
     fetchPrograms()
   }
 
+  function startEdit(p: any) {
+    setForm({
+      title: p.title || '',
+      slug: p.slug || '',
+      description: p.description || '',
+      year: p.year || '',
+      location: p.location || '',
+      beneficiaries: p.beneficiaries || '',
+      full_description: p.full_description || '',
+      impact_text: Array.isArray(p.impact) ? p.impact.join('\n') : (p.impact || ''),
+    })
+    setEditingId(p.id)
+    setShowForm(true)
+    setMsg('')
+  }
+
+  function cancelEdit() {
+    setForm(emptyProgram)
+    setEditingId(null)
+    setShowForm(false)
+    setMsg('')
+  }
+
   async function deleteProgram(id: string) {
-    if (!confirm('Delete this program?')) return
+    if (!confirm('Delete this program? This cannot be undone.')) return
     await supabase.from('programs').delete().eq('id', id)
     fetchPrograms()
   }
 
   return (
     <div className="space-y-5">
-      <form onSubmit={saveProgram}
-        className="space-y-3 p-4 rounded-xl border border-pink-200 dark:border-pink-800 bg-pink-50 dark:bg-pink-900/10">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-          {editingId ? 'Edit Program' : 'Add New Program'}
-        </h3>
-        <input placeholder="Title" value={form.title}
-          onChange={e => setForm({ ...form, title: e.target.value })}
-          required className={inputCls} />
-        <input placeholder="Slug (e.g. 2017-full-life-nursery)" value={form.slug}
-          onChange={e => setForm({ ...form, slug: e.target.value })}
-          required className={inputCls} />
-        <textarea placeholder="Description" rows={3} value={form.description}
-          onChange={e => setForm({ ...form, description: e.target.value })}
-          className={`${inputCls} resize-none`} />
-        {msg && <StatusBanner msg={msg} />}
-        <div className="flex gap-2">
-          <SubmitBtn loading={saving}
-            label={editingId ? 'Update Program' : 'Add Program'}
-            loadingLabel="Saving..." />
-          {editingId && (
-            <button type="button"
-              onClick={() => { setEditingId(null); setForm({ title: '', slug: '', description: '' }) }}
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-500 dark:text-gray-400">{programs.length} program{programs.length !== 1 ? 's' : ''}</p>
+        {!showForm && (
+          <button onClick={() => { setShowForm(true); setEditingId(null); setForm(emptyProgram) }}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-pink-600 text-white hover:bg-pink-700 transition">
+            <Plus size={12} /> Add Program
+          </button>
+        )}
+      </div>
+
+      {/* Form */}
+      {showForm && (
+        <form onSubmit={saveProgram}
+          className="space-y-3 p-4 rounded-xl border border-pink-200 dark:border-pink-800 bg-pink-50 dark:bg-pink-900/10">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+            {editingId ? 'Edit Program' : 'Add New Program'}
+          </h3>
+
+          {/* Title + Slug */}
+          <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">Title</label>
+              <input placeholder="e.g. 2017 Partnership - Full Life School" value={form.title}
+                onChange={e => setForm({ ...form, title: e.target.value })}
+                required className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+                URL Slug <span className="normal-case font-normal text-gray-400">(no spaces)</span>
+              </label>
+              <input placeholder="e.g. 2017-full-life-nursery" value={form.slug}
+                onChange={e => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                required className={inputCls} />
+            </div>
+          </div>
+
+          {/* Year + Location + Beneficiaries */}
+          <div className="grid grid-cols-1 min-[480px]:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">Year</label>
+              <input placeholder="e.g. 2019" value={form.year}
+                onChange={e => setForm({ ...form, year: e.target.value })}
+                className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">Location</label>
+              <input placeholder="e.g. Lagos, Nigeria" value={form.location}
+                onChange={e => setForm({ ...form, location: e.target.value })}
+                className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">Beneficiaries</label>
+              <input placeholder="e.g. 200+ youth" value={form.beneficiaries}
+                onChange={e => setForm({ ...form, beneficiaries: e.target.value })}
+                className={inputCls} />
+            </div>
+          </div>
+
+          {/* Short description */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">Short Description</label>
+            <textarea placeholder="One or two sentences shown on the programs listing page." rows={2} value={form.description}
+              onChange={e => setForm({ ...form, description: e.target.value })}
+              className={`${inputCls} resize-none`} />
+          </div>
+
+          {/* Full description */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">Full Description</label>
+            <textarea placeholder="Full paragraph shown on the program detail page." rows={4} value={form.full_description}
+              onChange={e => setForm({ ...form, full_description: e.target.value })}
+              className={`${inputCls} resize-none`} />
+          </div>
+
+          {/* Impact points */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
+              Key Impact Points <span className="normal-case font-normal text-gray-400">(one per line)</span>
+            </label>
+            <textarea
+              placeholder={'e.g.\nProvided educational materials\nTrained 50 teachers\nReached 200 families'}
+              rows={5} value={form.impact_text}
+              onChange={e => setForm({ ...form, impact_text: e.target.value })}
+              className={`${inputCls} resize-none`} />
+          </div>
+
+          {msg && <StatusBanner msg={msg} />}
+          <div className="flex gap-2">
+            <SubmitBtn loading={saving}
+              label={editingId ? 'Update Program' : 'Save Program'}
+              loadingLabel="Saving..." />
+            <button type="button" onClick={cancelEdit}
               className="flex-1 py-3.5 rounded-xl font-semibold text-sm border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
               Cancel
             </button>
-          )}
-        </div>
-      </form>
+          </div>
+        </form>
+      )}
 
-      {programs.length === 0 && (
-        <p className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">No programs yet.</p>
+      {/* Programs list */}
+      {programs.length === 0 && !showForm && (
+        <p className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">No programs yet. Click "Add Program" to get started.</p>
       )}
       <div className="space-y-3">
         {programs.map(p => (
           <div key={p.id}
             className="flex items-start justify-between gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
             <div className="min-w-0">
-              <p className="font-semibold text-sm text-gray-900 dark:text-white">{p.title}</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{p.slug}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-semibold text-sm text-gray-900 dark:text-white">{p.title}</p>
+                {p.year && (
+                  <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                    {p.year}
+                  </span>
+                )}
+              </div>
+              {p.location && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">📍 {p.location}</p>}
+              {p.beneficiaries && <p className="text-xs text-gray-400 dark:text-gray-500">👥 {p.beneficiaries}</p>}
               {p.description && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{p.description}</p>
               )}
             </div>
             <div className="flex items-center gap-1 flex-shrink-0">
-              <button onClick={() => { setForm(p); setEditingId(p.id) }}
+              <button onClick={() => startEdit(p)}
                 className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-400 hover:text-blue-500">
                 <Pencil size={14} />
               </button>
@@ -537,7 +674,8 @@ function RegistrationsTab() {
         <form onSubmit={handleAdd}
           className="space-y-3 p-4 rounded-xl border border-pink-200 dark:border-pink-800 bg-pink-50 dark:bg-pink-900/10">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Add New Record</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-3">
+
             <input type="text" placeholder="Full name" value={form.full_name}
               onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} className={inputCls} />
             <input type="email" placeholder="Email" value={form.email}
@@ -769,19 +907,26 @@ function SoftwareTracker() {
                   )}
                 </div>
 
-                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+<div className="mt-2 grid grid-cols-1 min-[480px]:grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400 break-all">
+
                   {rec.username && (
                     <span>👤 {rec.username}</span>
                   )}
                   {rec.password_hint && (
-                    <span className="flex items-center gap-1">
-                      🔑 {showPwd === rec.id ? rec.password_hint : '••••••••'}
-                      <button onClick={() => setShowPwd(showPwd === rec.id ? null : rec.id)}
-                        className="text-pink-600 hover:text-pink-500 ml-1">
-                        {showPwd === rec.id ? <EyeOff size={14} /> : <Eye size={14} />}
-                      </button>
-                    </span>
-                  )}
+  <span className="flex items-center gap-1 flex-wrap">
+    <span>🔑</span>
+    <span className="break-all">
+      {showPwd === rec.id ? rec.password_hint : '••••••••'}
+    </span>
+    <button
+      onClick={() => setShowPwd(showPwd === rec.id ? null : rec.id)}
+      className="text-pink-600 hover:text-pink-500 flex-shrink-0"
+    >
+      {showPwd === rec.id ? <EyeOff size={14} /> : <Eye size={14} />}
+    </button>
+  </span>
+)}
+
                   {rec.responsible_person && <span>👷 {rec.responsible_person}</span>}
                   {rec.start_date && <span>📅 Started: {new Date(rec.start_date).toLocaleDateString('en-GB')}</span>}
                   {rec.expiry_date && <span>⏳ Expires: {new Date(rec.expiry_date).toLocaleDateString('en-GB')}</span>}
@@ -809,150 +954,7 @@ function SoftwareTracker() {
   )
 }
 
-// ─── Tab: Help ────────────────────────────────────────────────────────────────
 
-function HelpTab() {
-  const items = [
-    {
-      q: 'How do I upload images or documents for a program?',
-      a: 'Go to the Media Upload tab. Select the program, optionally enter a folder name, then choose your files and click Upload Files. Images go to the program-images bucket and documents to program-documents automatically.'
-    },
-    {
-      q: 'How do I manage blog posts?',
-      a: 'Go to the Blog tab. Click New Post, fill in the title, slug, excerpt and content. Tick Publish immediately to make it live, or leave unticked to save as a draft. You can publish or unpublish any post later using the eye icon.'
-    },
-    {
-      q: 'What is the Program Manager tab for?',
-      a: 'It shows all uploaded media files across programs. You can filter by program and delete individual files. Deleting here removes both the file from storage and the database record.'
-    },
-    {
-      q: 'How do I read contact messages?',
-      a: 'Go to the Messages tab. Unread messages are highlighted in pink. Click the eye icon to mark a message as read or unread. Click the bin icon to delete it permanently.'
-    },
-    {
-      q: 'What is the Software Tracker for?',
-      a: 'It tracks all software services, logins, and subscription expiry dates used by the foundation. Services expiring within 30 days show a yellow warning. Expired services show in red.'
-    },
-    {
-      q: 'How do I add a visitor or donor record?',
-      a: 'Go to the Registrations tab. Click Add Record, fill in the details and select the type (Visitor, Donor, or Registered). Donor records can include an amount in GBP.'
-    },
-  ]
-
-  const [open, setOpen] = useState<number | null>(null)
-
-  return (
-    <div className="space-y-3">
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Frequently asked questions about using this admin panel.
-      </p>
-      {items.map((item, i) => (
-        <div key={i}
-          className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <button
-            onClick={() => setOpen(open === i ? null : i)}
-            className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">{item.q}</span>
-            <span className={`text-pink-600 flex-shrink-0 transition-transform duration-200 ${open === i ? 'rotate-45' : ''}`}>
-              <Plus size={16} />
-            </span>
-          </button>
-          {open === i && (
-            <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800">
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{item.a}</p>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-// ─── Main AdminPanel ──────────────────────────────────────────────────────────
-
-export default function AdminPanel({ onLogout }: AdminPanelProps) {
-  const [tab, setTab] = useState<Tab>('media')
-
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: 'media',         label: 'Media Upload',      icon: <Upload size={15} /> },
-    { id: 'blog',          label: 'Blog',               icon: <BookOpen size={15} /> },
-    { id: 'program',       label: 'Program Manager',    icon: <ImageIcon size={15} /> },
-    { id: 'messages',      label: 'Messages',           icon: <Mail size={15} /> },
-    { id: 'registrations', label: 'Registrations',      icon: <Users size={15} /> },
-    { id: 'software',      label: 'Software Tracker',   icon: <Shield size={15} /> },
-    { id: 'help',          label: 'Help',               icon: <HelpCircle size={15} /> },
-  ]
-
-  const titles: Record<Tab, string> = {
-    media:         'Media Upload',
-    blog:          'Blog Manager',
-    program:       'Program Manager',
-    messages:      'Contact Messages',
-    registrations: 'Registrations',
-    software:      'Software Tracker',
-    help:          'Help & Guide',
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-
-      {/* Top bar */}
-      <header className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-3 flex items-center justify-between">
-        <div>
-          <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white leading-tight">
-            Admin Panel
-          </h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
-            AdeGrange Child Foundation
-          </p>
-        </div>
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-          <LogOut size={13} /> Logout
-        </button>
-      </header>
-
-      <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
-
-        {/* Tab bar — horizontally scrollable on mobile */}
-        <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0 mb-6 sm:mb-8">
-          <div className="flex gap-1 min-w-max sm:min-w-0 sm:flex-wrap pb-1">
-            {tabs.map(t => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 ${
-                  tab === t.id
-                    ? 'bg-pink-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'
-                }`}>
-                {t.icon}
-                <span className="hidden xs:inline sm:inline">{t.label}</span>
-              </button>
-            ))}
-          </div>fF
-        </div>
-
-        {/* Content card */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6 shadow-sm">
-          <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-5 sm:mb-6">
-            {titles[tab]}
-          </h2>
-
-          {tab === 'media'         && <MediaTab />}
-          {tab === 'blog'          && <BlogTab />}
-          {tab === 'program'       && <ProgramTab />}
-          {tab === 'messages'      && <MessagesTab />}
-          {tab === 'registrations' && <RegistrationsTab />}
-          {tab === 'software'      && <SoftwareTracker />}
-          {tab === 'help'          && <HelpTab />}
-        </div>
-
-      </div>
-    </div>
-  )
-}
 // ─── Tab: Help ────────────────────────────────────────────────────────────────
 
 function HelpTab() {
@@ -1050,7 +1052,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
     media:         'Media Upload',
     blog:          'Blog Manager',
     program:       'Program Manager',
-    messages:      'Contact Messages',sho
+    messages:      'Contact Messages',
     registrations: 'Registrations',
     software:      'Software Tracker',
     help:          'Help & FAQ',
@@ -1102,26 +1104,41 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
           ))}
         </aside>
 
-        {/* Bottom tab bar — mobile only */}
-        <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex">
-          {tabs.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex-1 flex flex-col items-center justify-center py-2 gap-1 text-[10px] font-semibold transition-colors
-                ${tab === t.id
-                  ? 'text-pink-600'
-                  : 'text-gray-400 dark:text-gray-500'
-                }`}
-            >
-              {t.icon}
-              {t.shortLabel}
-            </button>
-          ))}
-        </nav>
+      {/* Bottom tab bar — mobile only — horizontally scrollable */}
+<nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40
+                bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800
+                flex overflow-x-auto scrollbar-none">
+  {tabs.map(t => (
+    <button
+      key={t.id}
+      onClick={() => setTab(t.id)}
+      className={`flex-shrink-0 flex flex-col items-center justify-center
+                  py-2.5 px-3 gap-1 text-[10px] font-semibold transition-colors min-w-[60px]
+                  ${tab === t.id
+                    ? 'text-pink-600'
+                    : 'text-gray-400 dark:text-gray-500'
+                  }`}
+    >
+      {/* Slightly larger icons for touch targets */}
+      <span className={tab === t.id ? 'text-pink-600' : ''}>
+        {t.id === 'media'         && <ImageIcon size={18} />}
+        {t.id === 'blog'          && <BookOpen size={18} />}
+        {t.id === 'program'       && <FileText size={18} />}
+        {t.id === 'messages'      && <Mail size={18} />}
+        {t.id === 'registrations' && <Users size={18} />}
+        {t.id === 'software'      && <Shield size={18} />}
+        {t.id === 'help'          && <HelpCircle size={18} />}
+      </span>
+      {t.shortLabel}
+    </button>
+  ))}
+</nav>
+
 
         {/* Main content */}
-        <main className="flex-1 px-4 sm:px-6 py-6 pb-24 sm:pb-6 overflow-y-auto">
+       {/* was pb-24 sm:pb-6 */}
+<main className="flex-1 px-4 sm:px-6 py-6 pb-28 sm:pb-6 overflow-y-auto">
+
 
           {/* Page title */}
           <div className="mb-6">

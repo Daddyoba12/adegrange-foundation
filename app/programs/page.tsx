@@ -4,41 +4,28 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ProgramGallery from '@/components/ProgramGallery'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
 
 function ProgramsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  const [programs, setPrograms] = useState<any[]>([])
+  const [programsLoading, setProgramsLoading] = useState(true)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null)
 
-  const programs = [
-    {
-      id: '2017-full-life-nursery',
-      title: '2017 Partnership - Full Life Nursery & Primary School',
-      description: 'Supporting early childhood education through community partnership and engagement.'
-    },
-    {
-      id: '2018-young-shapers-club',
-      title: '2018 Partnership - Young Shapers Club',
-      description: 'Empowering youth leadership and structured development through mentorship initiatives.'
-    },
-    {
-      id: '2017-peer-to-peer',
-      title: 'Summer 2017 - Peer-to-Peer Dialogue Program',
-      description: 'Promoting cross-community dialogue and youth participation in leadership development.'
-    },
-    {
-      id: '2019-girls-health-matter',
-      title: 'Summer 2019 - Girls Health Matter',
-      description: 'Advancing adolescent health awareness and educational support for girls.'
-    },
-    {
-      id: '2019-feeding-project',
-      title: '2019 Feeding Project - Chicago, Illinois',
-      description: 'International outreach initiative supporting families through structured feeding and welfare services.'
+  useEffect(() => {
+    async function fetchPrograms() {
+      const { data } = await supabase
+        .from('programs')
+        .select('slug, title, description, year')
+        .order('year', { ascending: true })
+      setPrograms(data || [])
+      setProgramsLoading(false)
     }
-  ]
+    fetchPrograms()
+  }, [])
 
   useEffect(() => {
     const galleryId = searchParams.get('gallery')
@@ -60,7 +47,7 @@ function ProgramsContent() {
     router.push('/programs', { scroll: false })
   }
 
-  const selectedProgramData = programs.find(p => p.id === selectedProgram)
+  const selectedProgramData = programs.find(p => p.slug === selectedProgram)
 
   return (
     <div className="min-h-screen py-12 sm:py-20 px-4 sm:px-6">
@@ -77,10 +64,16 @@ function ProgramsContent() {
         </div>
 
         {/* Programs Grid — 1 col on mobile, 2 col on large screens */}
+        {programsLoading ? (
+          <div className="text-center py-20">
+            <div className="inline-block w-6 h-6 border-2 border-gray-300 border-t-pink-600 rounded-full animate-spin" />
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">Loading programs...</p>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
           {programs.map((program, index) => (
             <div
-              key={program.id}
+              key={program.slug}
               className="program-card group relative rounded-2xl p-5 sm:p-8 border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
               style={{
                 animationName: 'fadeInUp',
@@ -97,11 +90,7 @@ function ProgramsContent() {
 
                 {/* Year badge */}
                 <span className="inline-block text-xs font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                  {program.id.startsWith('2017')
-                    ? '2017'
-                    : program.id.startsWith('2018')
-                    ? '2018'
-                    : '2019'}
+                  {program.year || program.slug.substring(0, 4)}
                 </span>
 
                 {/* Title — smaller on mobile, larger on desktop */}
@@ -119,7 +108,7 @@ function ProgramsContent() {
                   {/* Stack buttons on very small screens, row on sm+ */}
                   <div className="flex flex-col xs:flex-row sm:flex-row gap-2 sm:gap-3">
                     <Link
-                      href={`/programs/${program.id}`}
+                      href={`/programs/${program.slug}`}
                       className="w-full sm:w-auto text-center px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-95 hover:scale-105
                                  bg-gray-900 text-white hover:bg-gray-700
                                  dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
@@ -128,7 +117,7 @@ function ProgramsContent() {
                     </Link>
 
 <button
-  onClick={() => openGallery(program.id)}
+  onClick={() => openGallery(program.slug)}
   onMouseEnter={e => {
     const el = e.currentTarget
     el.style.backgroundColor = 'rgba(107,114,128,0.15)'
@@ -152,6 +141,7 @@ function ProgramsContent() {
             </div>
           ))}
         </div>
+        )}
 
         {/* Gallery Modal */}
         <ProgramGallery
@@ -160,6 +150,7 @@ function ProgramsContent() {
           isOpen={galleryOpen}
           onClose={closeGallery}
         />
+
 
       </div>
     </div>
