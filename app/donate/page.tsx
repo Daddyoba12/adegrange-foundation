@@ -50,14 +50,25 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 /* ─── Card form (inside Elements) ─── */
-function CardForm({ name, email, agreed, intentMode, onError, onSuccess }: {
-  name: string; email: string; agreed: boolean
+function CardForm({ name, email, phone, agreed, intentMode, donorRef, displayAmount, currency, frequency, onError, onSuccess }: {
+  name: string; email: string; phone: string; agreed: boolean
   intentMode: 'payment' | 'setup'
+  donorRef: string; displayAmount: number; currency: string; frequency: string
   onError: (m: string) => void; onSuccess: () => void
 }) {
   const stripe   = useStripe()
   const elements = useElements()
   const [busy, setBusy] = useState(false)
+
+  async function sendEmails(amount: number) {
+    try {
+      await fetch('/api/send-thank-you', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, amount, currency, frequency, donorRef }),
+      })
+    } catch { /* email failure must not block redirect */ }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -67,15 +78,14 @@ function CardForm({ name, email, agreed, intentMode, onError, onSuccess }: {
     setBusy(true)
     onError('')
 
-    const returnUrl = `${window.location.origin}/thank-you?name=${encodeURIComponent(name)}`
+    const baseUrl = `${window.location.origin}/thank-you?ref=${encodeURIComponent(donorRef)}&name=${encodeURIComponent(name)}&currency=${currency}`
 
     try {
       if (intentMode === 'setup') {
-        // Monthly donation — confirm SetupIntent
         const { error, setupIntent } = await stripe.confirmSetup({
           elements,
           confirmParams: {
-            return_url: returnUrl,
+            return_url: `${baseUrl}&amount=${displayAmount}`,
             payment_method_data: { billing_details: { name, email } },
           },
           redirect: 'if_required',
@@ -83,14 +93,14 @@ function CardForm({ name, email, agreed, intentMode, onError, onSuccess }: {
         if (error) {
           onError(error.message ?? 'Setup failed — please check your card details.')
         } else if (setupIntent?.status === 'succeeded') {
-          window.location.href = returnUrl
+          await sendEmails(displayAmount)
+          window.location.href = `${baseUrl}&amount=${displayAmount}`
         }
       } else {
-        // One-time donation — confirm PaymentIntent
         const { error, paymentIntent } = await stripe.confirmPayment({
           elements,
           confirmParams: {
-            return_url: returnUrl,
+            return_url: `${baseUrl}&amount=${displayAmount}`,
             payment_method_data: { billing_details: { name, email } },
           },
           redirect: 'if_required',
@@ -98,7 +108,8 @@ function CardForm({ name, email, agreed, intentMode, onError, onSuccess }: {
         if (error) {
           onError(error.message ?? 'Payment failed — please check your card details.')
         } else if (paymentIntent?.status === 'succeeded') {
-          window.location.href = `${returnUrl}&amount=${paymentIntent.amount / 100}`
+          await sendEmails(paymentIntent.amount / 100)
+          window.location.href = `${baseUrl}&amount=${paymentIntent.amount / 100}`
         }
       }
     } catch (err: any) {
@@ -145,6 +156,7 @@ export default function DonatePage() {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [intentMode,   setIntentMode]   = useState<'payment' | 'setup'>('payment')
   const [secretLoading, setSecretLoading] = useState(false)
+  const [donorRef] = useState(() => generateDonorRef())
 
   const sym  = currencies.find((c) => c.code === currency)?.symbol ?? '£'
   const rate = rates[currency] ?? 1
@@ -342,7 +354,7 @@ export default function DonatePage() {
               clientSecret,
               appearance: { theme: 'stripe', variables: { colorPrimary: '#db2777', borderRadius: '12px' } },
             }}>
-              <CardForm name={name} email={email} agreed={agreed} intentMode={intentMode} onError={setError} onSuccess={() => {}} />
+              <CardForm name={name} email={email} phone={phone} agreed={agreed} intentMode={intentMode} donorRef={donorRef} displayAmount={displayAmount} currency={currency} frequency={frequency} onError={setError} onSuccess={() => {}} />
             </Elements>
           ) : (
             <p className="text-sm text-red-400 text-center py-4">Could not load payment form. Please refresh and try again.</p>
