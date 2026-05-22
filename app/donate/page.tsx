@@ -78,7 +78,7 @@ function CardForm({ name, email, phone, agreed, intentMode, donorRef, displayAmo
     setBusy(true)
     onError('')
 
-    const baseUrl = `${window.location.origin}/thank-you?ref=${encodeURIComponent(donorRef)}&name=${encodeURIComponent(name)}&currency=${currency}`
+    const baseUrl = `${window.location.origin}/thank-you?ref=${encodeURIComponent(donorRef)}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&currency=${currency}&frequency=${frequency}`
 
     try {
       if (intentMode === 'setup') {
