@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const ADMIN_EMAIL = 'titobalo12@gmail.com'
+const ADMIN_EMAIL = 'info@adegrangefoundation.org'
 
 export async function POST(req: NextRequest) {
   try {
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
         body: JSON.stringify({
-          from: 'AdeGrange Foundation <onboarding@resend.dev>',
+          from: 'AdeGrange Foundation <info@adegrangefoundation.org>',
           to: email,
           subject: `Thank you for your donation — Ref: ${donorRef}`,
           html: donorHtml,
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
         body: JSON.stringify({
-          from: 'AdeGrange Donations <onboarding@resend.dev>',
+          from: 'AdeGrange Donations <info@adegrangefoundation.org>',
           to: ADMIN_EMAIL,
           subject: `New donation: ${amountStr} from ${name} — ${donorRef}`,
           html: adminHtml,
