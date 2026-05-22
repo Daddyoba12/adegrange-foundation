@@ -1,14 +1,36 @@
-// /api/donate/route.ts
-export async function POST(req: Request) {
-  const body = await req.json()
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
-  const { error } = await supabase.from('donations').insert({
-    email: body.email,
-    amount: body.amount,
-    type: body.type || 'donor'
-  })
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
-  if (error) return new Response(error.message, { status: 500 })
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
 
-  return Response.json({ success: true })
+    const { error } = await supabase.from('donations').insert({
+      email: body.email,
+      amount: body.amount,
+      type: body.type || 'donor'
+    })
+
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+
+  } catch (err) {
+    console.error('API error:', err)
+    return NextResponse.json(
+      { success: false, message: 'Server error' },
+      { status: 500 }
+    )
+  }
 }

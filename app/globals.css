@@ -274,3 +274,11 @@ button:focus {
   outline: 3px solid rgba(236,72,153,0.3);
   outline-offset: 3px;
 }
+/* Hide scrollbar on mobile bottom nav */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

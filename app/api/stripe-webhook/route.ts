@@ -1,33 +1,71 @@
+import { NextRequest } from 'next/server'
 import Stripe from 'stripe'
-import { headers } from 'next/headers'
+import { supabase } from '@/lib/supabase'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
-// IMPORTANT: tell Next.js NOT to parse the body
-// Stripe needs the raw buffer to verify the signature
-export const config = {
-  api: {
-    bodyParser: false
-  }
+export const runtime = 'nodejs'
+
+// Stripe client
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2026-02-25.clover'
+})
+
+
+// ─── Thank-you email helper ───────────────────────────────────────────────────
+// Uses a simple fetch to your email provider (e.g. Resend / SendGrid).
+// Replace the body below with your provider's API call.
+async function sendThankYouEmail(
+  email: string | null | undefined,
+  name:  string | null | undefined,
+  amount: number | null
+) {
+  if (!email) return
+
+  const amountFormatted =
+    amount != null ? `£${(amount / 100).toFixed(2)}` : 'your generous donation'
+
+  // Example using Resend — swap for SendGrid/Mailgun/etc. as needed
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`
+    },
+    body: JSON.stringify({
+      from:    'AdeGrange Foundation <noreply@adegrangefoundation.org>',
+      to:      email,
+      subject: 'Thank You for Your Donation',
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px">
+          <h2 style="color:#111">Thank you${name ? `, ${name}` : ''}!</h2>
+          <p>We have received ${amountFormatted} — your support helps us protect
+             mothers and children across Africa.</p>
+          <p>You will receive an official receipt shortly.</p>
+          <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
+          <p style="font-size:12px;color:#999">
+            AdeGrange Child Foundation &mdash; Registered Charity
+          </p>
+        </div>
+      `
+    })
+  })
 }
 
-export async function POST(req: Request) {
-  // 1. Get the raw body as a buffer (required for signature check)
+// ─── Webhook handler ─────────────────────────────────────────────────────────
+export async function POST(req: NextRequest) {
+  // 1. Read raw body — required for signature verification
   const body = await req.text()
-
-  // 2. Get the Stripe signature from the request headers
-  const headersList = await headers()
-  const signature = headersList.get('stripe-signature')
+  const signature = req.headers.get('stripe-signature')
 
   if (!signature) {
     console.error('Missing stripe-signature header')
-    return new Response(
-      JSON.stringify({ error: 'Missing stripe-signature header' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    return Response.json(
+      { error: 'Missing stripe-signature header' },
+      { status: 400 }
     )
   }
 
-  // 3. Verify the event — this throws if signature is invalid
+  // 2. Verify event signature
   let event: Stripe.Event
 
   try {
@@ -38,58 +76,86 @@ export async function POST(req: Request) {
     )
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message)
-    return new Response(
-      JSON.stringify({ error: `Webhook error: ${err.message}` }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    return Response.json(
+      { error: `Webhook error: ${err.message}` },
+      { status: 400 }
     )
   }
 
-  // 4. Handle specific event types
+  // 3. Handle events
   try {
     switch (event.type) {
 
+      // ── Successful donation ─────────────────────────────────────────────
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
-        console.log('Donation confirmed:', {
-          id:       session.id,
-          amount:   session.amount_total,
-          currency: session.currency,
-          email:    session.customer_details?.email,
-          name:     session.customer_details?.name,
-        })
 
-        // TODO: save to your database here
-        // await supabase.from('donations').insert({ ... })
+        const donationRow = {
+          stripe_session_id: session.id,
+          amount:            session.amount_total,
+          currency:          session.currency,
+          email:             session.customer_details?.email  ?? null,
+          name:              session.customer_details?.name   ?? null,
+          status:            'completed',
+          created_at:        new Date().toISOString(),
+        }
 
-        // TODO: send confirmation email here
-        // await sendThankYouEmail(session.customer_details?.email)
+        // Save to Supabase
+        const { error: dbError } = await supabase
+          .from('donations')
+          .insert(donationRow)
+
+        if (dbError) {
+          // Log but do not return 500 — Stripe would retry endlessly
+          console.error('Supabase insert error:', dbError.message)
+        } else {
+          console.log('Donation saved:', donationRow)
+        }
+
+        // Send thank-you email
+        try {
+          await sendThankYouEmail(
+            session.customer_details?.email,
+            session.customer_details?.name,
+            session.amount_total
+          )
+          console.log('Thank-you email sent to:', session.customer_details?.email)
+        } catch (emailErr: any) {
+          // Email failure must not block the 200 response
+          console.error('Email send error:', emailErr.message)
+        }
+
         break
       }
 
+      // ── Failed payment ──────────────────────────────────────────────────
       case 'payment_intent.payment_failed': {
         const intent = event.data.object as Stripe.PaymentIntent
+
         console.warn('Payment failed:', intent.id)
-        // TODO: notify your team or log to DB
+
+        // Optionally log failed attempts to Supabase
+        await supabase.from('donation_failures').insert({
+          stripe_payment_intent_id: intent.id,
+          reason: intent.last_payment_error?.message ?? 'unknown',
+          created_at: new Date().toISOString(),
+        })
+
         break
       }
 
-      // Add more event types here as needed
+      // ── All other events ────────────────────────────────────────────────
       default:
-        // Acknowledge receipt of unhandled event types
-        // so Stripe does not keep retrying
         console.log(`Unhandled event type: ${event.type}`)
     }
   } catch (err: any) {
     console.error('Error processing webhook event:', err.message)
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    return Response.json(
+      { error: 'Internal server error' },
+      { status: 500 }
     )
   }
 
-  // 5. Always return 200 so Stripe knows the webhook was received
-  return new Response(
-    JSON.stringify({ received: true }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
-  )
+  // 4. Always return 200 so Stripe stops retrying
+  return Response.json({ received: true }, { status: 200 })
 }
