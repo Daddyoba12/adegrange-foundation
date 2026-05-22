@@ -50,8 +50,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 /* ─── Card form (inside Elements) ─── */
-function CardForm({ name, email, agreed, onError, onSuccess }: {
+function CardForm({ name, email, agreed, intentMode, onError, onSuccess }: {
   name: string; email: string; agreed: boolean
+  intentMode: 'payment' | 'setup'
   onError: (m: string) => void; onSuccess: () => void
 }) {
   const stripe   = useStripe()
@@ -66,23 +67,39 @@ function CardForm({ name, email, agreed, onError, onSuccess }: {
     setBusy(true)
     onError('')
 
-    try {
-      const { error, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/thank-you`,
-          payment_method_data: { billing_details: { name, email } },
-        },
-        redirect: 'if_required', // only redirect for 3DS — handle success in-page
-      })
+    const returnUrl = `${window.location.origin}/thank-you?name=${encodeURIComponent(name)}`
 
-      if (error) {
-        onError(error.message ?? 'Payment failed — please check your card details.')
-      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Payment succeeded without redirect needed
-        window.location.href = `/thank-you?name=${encodeURIComponent(name)}&amount=${paymentIntent.amount / 100}`
+    try {
+      if (intentMode === 'setup') {
+        // Monthly donation — confirm SetupIntent
+        const { error, setupIntent } = await stripe.confirmSetup({
+          elements,
+          confirmParams: {
+            return_url: returnUrl,
+            payment_method_data: { billing_details: { name, email } },
+          },
+          redirect: 'if_required',
+        })
+        if (error) {
+          onError(error.message ?? 'Setup failed — please check your card details.')
+        } else if (setupIntent?.status === 'succeeded') {
+          window.location.href = returnUrl
+        }
       } else {
-        // Redirect is happening (3DS etc.) — Stripe handles it
+        // One-time donation — confirm PaymentIntent
+        const { error, paymentIntent } = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: returnUrl,
+            payment_method_data: { billing_details: { name, email } },
+          },
+          redirect: 'if_required',
+        })
+        if (error) {
+          onError(error.message ?? 'Payment failed — please check your card details.')
+        } else if (paymentIntent?.status === 'succeeded') {
+          window.location.href = `${returnUrl}&amount=${paymentIntent.amount / 100}`
+        }
       }
     } catch (err: any) {
       onError(err.message ?? 'Something went wrong. Please try again.')
@@ -126,6 +143,7 @@ export default function DonatePage() {
   const [error,     setError]     = useState('')
   const [progress,  setProgress]  = useState(0)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [intentMode,   setIntentMode]   = useState<'payment' | 'setup'>('payment')
   const [secretLoading, setSecretLoading] = useState(false)
 
   const sym  = currencies.find((c) => c.code === currency)?.symbol ?? '£'
@@ -157,7 +175,10 @@ export default function DonatePage() {
           }),
         })
         const data = await res.json()
-        if (data.clientSecret) setClientSecret(data.clientSecret)
+        if (data.clientSecret) {
+          setClientSecret(data.clientSecret)
+          setIntentMode(data.mode === 'setup' ? 'setup' : 'payment')
+        }
       } catch {
         // silently fail — user will see error on submit
       } finally {
@@ -321,7 +342,7 @@ export default function DonatePage() {
               clientSecret,
               appearance: { theme: 'stripe', variables: { colorPrimary: '#db2777', borderRadius: '12px' } },
             }}>
-              <CardForm name={name} email={email} agreed={agreed} onError={setError} onSuccess={() => {}} />
+              <CardForm name={name} email={email} agreed={agreed} intentMode={intentMode} onError={setError} onSuccess={() => {}} />
             </Elements>
           ) : (
             <p className="text-sm text-red-400 text-center py-4">Could not load payment form. Please refresh and try again.</p>
