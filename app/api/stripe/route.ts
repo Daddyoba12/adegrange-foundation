@@ -1,15 +1,12 @@
 import Stripe from "stripe"
 import { NextResponse } from "next/server"
 
-// Guard against missing env var at startup
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("Missing STRIPE_SECRET_KEY environment variable")
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-
 export async function POST(req: Request) {
   try {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json({ error: "Stripe not configured" }, { status: 500 })
+    }
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
     const body = await req.json()
     const { amount, currency, email, frequency, recurring: recurringRaw } = body
     const recurring = recurringRaw ?? frequency === 'monthly'
