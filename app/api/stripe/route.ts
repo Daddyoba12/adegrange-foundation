@@ -11,7 +11,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { amount, currency, email, recurring } = body
+    const { amount, currency, email, frequency, recurring: recurringRaw } = body
+    const recurring = recurringRaw ?? frequency === 'monthly'
 
     // ── Input validation ──────────────────────────────────────
     if (!amount || typeof amount !== "number" || amount < 1) {
@@ -68,7 +69,7 @@ export async function POST(req: Request) {
       // allow_promotion_codes: true,
     })
 
-    return NextResponse.json({ id: session.id })
+    return NextResponse.json({ sessionId: session.id })
 
   } catch (error) {
     console.error("Stripe session error:", error)
