@@ -50,8 +50,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 /* ─── Card form (inside Elements) ─── */
-function CardForm({ name, email, agreed, onError }: {
-  name: string; email: string; agreed: boolean; onError: (m: string) => void
+function CardForm({ name, email, agreed, onError, onSuccess }: {
+  name: string; email: string; agreed: boolean
+  onError: (m: string) => void; onSuccess: () => void
 }) {
   const stripe   = useStripe()
   const elements = useElements()
@@ -65,16 +66,27 @@ function CardForm({ name, email, agreed, onError }: {
     setBusy(true)
     onError('')
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/thank-you`,
-        payment_method_data: { billing_details: { name, email } },
-      },
-    })
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/thank-you`,
+          payment_method_data: { billing_details: { name, email } },
+        },
+        redirect: 'if_required', // only redirect for 3DS — handle success in-page
+      })
 
-    if (error) {
-      onError(error.message ?? 'Payment failed — please try again.')
+      if (error) {
+        onError(error.message ?? 'Payment failed — please check your card details.')
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // Payment succeeded without redirect needed
+        window.location.href = `/thank-you?name=${encodeURIComponent(name)}&amount=${paymentIntent.amount / 100}`
+      } else {
+        // Redirect is happening (3DS etc.) — Stripe handles it
+      }
+    } catch (err: any) {
+      onError(err.message ?? 'Something went wrong. Please try again.')
+    } finally {
       setBusy(false)
     }
   }
@@ -87,7 +99,15 @@ function CardForm({ name, email, agreed, onError }: {
         disabled={!stripe || busy}
         className="w-full py-4 rounded-2xl font-semibold text-base bg-pink-600 hover:bg-pink-700 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
       >
-        {busy ? 'Processing...' : 'Confirm Donation'}
+        {busy ? (
+          <span className="flex items-center justify-center gap-2">
+            <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Processing...
+          </span>
+        ) : 'Confirm Donation'}
       </button>
     </form>
   )
@@ -301,7 +321,7 @@ export default function DonatePage() {
               clientSecret,
               appearance: { theme: 'stripe', variables: { colorPrimary: '#db2777', borderRadius: '12px' } },
             }}>
-              <CardForm name={name} email={email} agreed={agreed} onError={setError} />
+              <CardForm name={name} email={email} agreed={agreed} onError={setError} onSuccess={() => {}} />
             </Elements>
           ) : (
             <p className="text-sm text-red-400 text-center py-4">Could not load payment form. Please refresh and try again.</p>
